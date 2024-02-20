@@ -6,7 +6,9 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 
+import java.time.temporal.JulianFields;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,11 +41,11 @@ public class User implements SolarCalc , LunarCalc{
         return latLng[1];
     }
 
-    public double getJD() {
+    public double getCurrentJD() {
         Calendar calender = Calendar.getInstance();
-        int year = 1992; // calender.get(Calendar.YEAR);
-        int month = 4 ;// calender.get(Calendar.MONTH) + 1; //class starts month count at 0
-        int day = 12; // calender.get(Calendar.DAY_OF_MONTH);
+        int year = 1988; // 1992; // calender.get(Calendar.YEAR);
+        int month = 3; //4 ;// calender.get(Calendar.MONTH) + 1; //class starts month count at 0
+        int day = 20; //12; // calender.get(Calendar.DAY_OF_MONTH);
         if (month <= 2) {
             year -= 1;
             month += 12;
@@ -52,6 +54,7 @@ public class User implements SolarCalc , LunarCalc{
         double B = 2 - A + Math.floor(A / 4);
         return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
     }
+
 
     @SuppressLint("MissingPermission")
     private double[] getUserLatLng() {
@@ -69,4 +72,5 @@ public class User implements SolarCalc , LunarCalc{
         }).addOnSuccessListener(location -> latLng = new double[]{location.getLatitude(), location.getLongitude()});
         return latLng;
     }
+
 }

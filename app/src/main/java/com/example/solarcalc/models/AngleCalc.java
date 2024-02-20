@@ -1,8 +1,11 @@
 package com.example.solarcalc.models;
 
+import java.time.LocalDate;
+
 public interface AngleCalc {
     double obliquityOfEcliptic = 23.440636; // ε
     double PI = 3.1415926535897932384626433832795028841971;
+
 
     default double rad2deg(double radians) {
         return (180.0 / PI) * radians;
@@ -21,7 +24,14 @@ public interface AngleCalc {
         return limited;
     }
 
+    default double localHourAngle (double siderealInDegrees, double observerLongitude, double ascension) {
+        return siderealInDegrees - observerLongitude - ascension;
+    }
 
+    default double localAltitude(double localHourAngle, double observersLatitude, double declination) {
+        double altitude = Math.asin( (Math.sin(deg2rad(observersLatitude)) * Math.sin(deg2rad(declination))) + (Math.cos(deg2rad(observersLatitude)) * Math.cos(deg2rad(declination)) * Math.cos(deg2rad(localHourAngle))) );
+        return rad2deg(altitude);
+    }
     default double[] degreesToHoursMinutesSeconds(double degrees) {
         double hours = Math.floor(degrees / 15);
         double minutes = Math.floor(((degrees / 15) - hours) * 60);
@@ -49,6 +59,17 @@ public interface AngleCalc {
         double inpt1 = (Math.cos(lat) * Math.sin(lng) * Math.cos(obOfEclip)) - (Math.sin(lat) * Math.sin(obOfEclip));
         double inpt2 = Math.cos(lat) * Math.cos(lng);
         return rad2deg(Math.atan2(inpt1, inpt2));
+    }
+
+
+    default double getInRange(double decimal) {
+        if (decimal < 0) {
+            return decimal + 1;
+        } else if (decimal > 1) {
+            return decimal - 1;
+        } else {
+            return decimal;
+        }
     }
 
 }

@@ -14,8 +14,6 @@ import androidx.core.app.ActivityCompat;
 import com.example.solarcalc.models.TimeCalc;
 import com.example.solarcalc.models.User;
 
-import java.time.LocalTime;
-
 
 public class MainActivity extends AppCompatActivity implements TimeCalc {
     private final static int REQUEST_CODE = 99;
@@ -34,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         solar_noon_text_view = findViewById(R.id.solar_noon_text_view);
 
         checkLocationPermission();
-        solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(user.getJD(), -95.852966, user.getOffSet())).toString());
-        user.getMoonLatLngDist(user.getJD());
+        solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(user.getCurrentJD(), -95.852966, user.getOffSet())).toString());
+        user.tester();
 
     }
 

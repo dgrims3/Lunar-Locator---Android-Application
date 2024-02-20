@@ -1,9 +1,21 @@
 package com.example.solarcalc.models;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import java.time.LocalDate;
+
 public interface LunarCalc extends TimeCalc, AngleCalc {
     // moonLat β, moonLong λ, earthMoonDistance ∆
 
     int COUNT = 60;
+
+    enum position {ASCENSION, DECLINATION}
+
+    enum time {RISING, TRANSIT, SETTING}
+
+    enum coords {LAT, LNG, DISTANCE}
 
     enum Term {
         TERM_D,
@@ -154,7 +166,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     default double moon_ascending_node(double jce) {
-        return rad2deg(Math.sin(deg2rad(125.04452 - 1934.136261 * jce)));
+        return rad2deg(Math.sin(deg2rad((125.04452 - (1934.136261 * jce) + .0020708 / 450000))));
     }
 
     default double sun_mean_longitude_L(double jce) {
@@ -239,16 +251,18 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return (latitude + additiveToMoonLat(jce)) / 1000000;
     }
 
-    default double equatorialHorizontalParallax (double distance){
-       return Math.asin(6378.14/distance);
+    // pg 287
+    default double equatorialHorizontalParallax(double distance) {
+        return Math.asin(6378.14 / distance);
     }
 
     // This can get added to the moon's longitude from greater accuracy. Currently the number returned is angle seconds and should be converted to degrees.
-    // page 9
-    default double nutation_in_longitude(double node, double L, double LPR) {
-        node = deg2rad(node);
-        LPR = deg2rad(LPR);
-        return ((-17.2 * Math.sin(node)) - (-1.32 * Math.sin(2 * L)) - (.23 * Math.sin(2 * LPR)) + (.21 * Math.sin(2 * node)));
+    // page 151 || 143
+    default double nutation_in_longitude(double jce) {
+        double node = moon_ascending_node(jce);
+        double L = deg2rad(280.4665 + (36000.7698 * jce));
+        double LPR = deg2rad(218.3165 + (481267.8813 * jce));
+        return rad2deg(((-17.2 * Math.sin(node)) - (-1.32 * Math.sin(2 * L)) - (.23 * Math.sin(2 * LPR)) + (.21 * Math.sin(2 * node))));
     }
 
     // page 340/351
@@ -270,8 +284,75 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
                 jce,
                 ML_TERMS
         );
-        System.out.println(getDeclination(moon_latitude_coordinates_in_degrees(lat, jce), moon_longitude_coordinates_in_degrees(lngDist[0], jce)));
-        System.out.println(getRightAscension(moon_latitude_coordinates_in_degrees(lat, jce), moon_longitude_coordinates_in_degrees(lngDist[0], jce)));
         return new double[]{moon_latitude_coordinates_in_degrees(lat, jce), moon_longitude_coordinates_in_degrees(lngDist[0], jce), moon_earth_distance_in_km(lngDist[1])};
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[] lunarAscensionDeclinationDistance(LocalDate date) {
+        double jd = getJDFromCalenderDate(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        double[] moonLatLngDist = getMoonLatLngDist(jd);
+        double moonDeclination = getDeclination(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()]);
+        double moonRightAscension = getRightAscension(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()]);
+
+        return new double[]{moonRightAscension, moonDeclination, moonLatLngDist[coords.DISTANCE.ordinal()]};
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[] risingTransitSetting(LocalDate date, double[] latlng, double[] lunarAscDecDist) {
+        double jd = getJDFromCalenderDate(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        double jce = calcTimeJulianCent(jd);
+        double sidereal = greenwichMeanSiderealTime(jce);
+        double lunarDistance = lunarAscDecDist[coords.DISTANCE.ordinal()];
+        double standardAltitude = deg2rad(-.583 - equatorialHorizontalParallax(lunarDistance)); // deg2rad(.125); // Lunar
+
+        double lat = latlng[coords.LAT.ordinal()];
+        double lng = -1 * latlng[coords.LNG.ordinal()]; // reverse the longitude so it is measured positively west from Greenwich.
+
+        double localHourAngle = Math.sin(standardAltitude) - (Math.sin(deg2rad(lat)) * Math.sin(deg2rad(lunarAscDecDist[position.DECLINATION.ordinal()]))) / (Math.cos(deg2rad(lat)) * Math.cos(deg2rad(lunarAscDecDist[position.DECLINATION.ordinal()])));
+        localHourAngle = rad2deg(Math.acos(localHourAngle));
+
+        double transit = getInRange((lunarAscDecDist[position.ASCENSION.ordinal()] + lng - sidereal) / 360);
+        double rising = transit - (localHourAngle / 360);
+        double setting = transit + (localHourAngle / 360);
+        System.out.println(rising);
+        System.out.println(transit);
+        System.out.println(setting);
+
+        fractionOfDayToTime(rising);
+        fractionOfDayToTime(transit);
+        fractionOfDayToTime(setting);
+
+        return new double[]{rising, transit, setting};
+    }
+
+    default double[] interpolate(double m, double[] one, double[] two, double[] three) {
+        double n = m + (56.0 / 86400);
+        double aAsc = two[0] - one[0];
+        double bAsc = three[0] - two[0];
+        double cAsc = bAsc - aAsc;
+
+        double asc = two[0] + (n / 2) * (aAsc + bAsc + (cAsc * n));
+
+        double aDec = two[1] - one[1];
+        double bDec = three[1] - two[1];
+        double cDec = bDec - aDec;
+
+        double dec = two[1] + (n / 2) * (aDec + bDec + (cDec * n));
+        return new double[]{asc, dec};
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default void tester() {
+        //double[] coords = {51.4934, 0}; //London
+        double[] coords = {42.3601, -71.0589}; //Boston
+        LocalDate date = LocalDate.of(2024, 2, 11);
+        double[] td = lunarAscensionDeclinationDistance(date);
+        double[] riseTransitSet = risingTransitSetting(date, coords, td);
+
+        localFractionOfDayFromUTCToLocal(riseTransitSet[time.RISING.ordinal()], date, coords, false);
+        localFractionOfDayFromUTCToLocal(riseTransitSet[time.TRANSIT.ordinal()], date, coords, false);
+        localFractionOfDayFromUTCToLocal(riseTransitSet[time.SETTING.ordinal()], date, coords, false);
+    }
+
 }
