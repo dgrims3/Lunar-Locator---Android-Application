@@ -14,11 +14,15 @@ import androidx.core.app.ActivityCompat;
 import com.example.solarcalc.models.TimeCalc;
 import com.example.solarcalc.models.User;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements TimeCalc {
+    enum time {RISING, TRANSIT, SETTING}
     private final static int REQUEST_CODE = 99;
     PackageManager packageManager;
-    TextView solar_noon_text_view, moon_rise_text_view;
+    TextView solar_noon_text_view, moon_rise_text_view, moon_transit_text_view, moon_set_text_view;
     User user;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -30,11 +34,16 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         packageManager = getPackageManager();
         user = new User(this);
         solar_noon_text_view = findViewById(R.id.solar_noon_text_view);
+        moon_rise_text_view = findViewById(R.id.moon_rise_text_view);
+        moon_transit_text_view = findViewById(R.id.moon_transit_text_view);
+        moon_set_text_view = findViewById(R.id.moon_set_text_view);
 
         checkLocationPermission();
         solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(user.getCurrentJD(), -95.852966, user.getOffSet())).toString());
-        user.tester();
-
+        List<ZonedDateTime> moonTimes = user.calcMoonTimes();
+        moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
+        moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
+        moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));
     }
 
     private void checkLocationPermission() {

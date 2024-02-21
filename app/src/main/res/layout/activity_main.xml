@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Solar Noon"
+        android:text="Solar Transit"
         android:textColor="@color/black"
         android:textSize="44sp"
         android:textStyle="bold" />
@@ -46,6 +46,46 @@
         android:textSize="44sp"
         android:textStyle="bold"
         android:layout_below="@+id/moon_rise_text"/>
+
+    <TextView
+        android:id="@+id/moon_transit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Moon Transit"
+        android:textColor="@color/black"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/moon_rise_text_view"/>
+    <TextView
+        android:id="@+id/moon_transit_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textColor="@color/black"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/moon_transit_text"/>
+
+    <TextView
+        android:id="@+id/moon_set_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Moon Set"
+        android:textColor="@color/black"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/moon_transit_text_view"/>
+    <TextView
+        android:id="@+id/moon_set_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textColor="@color/black"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/moon_set_text"/>
 
 
 </RelativeLayout>

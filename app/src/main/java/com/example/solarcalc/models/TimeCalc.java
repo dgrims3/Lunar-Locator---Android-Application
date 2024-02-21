@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public interface TimeCalc extends AngleCalc {
     enum coords {LAT, LNG}
@@ -76,6 +77,13 @@ public interface TimeCalc extends AngleCalc {
         return LocalTime.of(hour, minute, second);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default String dateTimeToString(ZonedDateTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss ");
+        String formattedDateTime = time.format(formatter);
+        return formattedDateTime;
+    }
+
     default void fractionOfDayToTime (double fractionOfDay) {
         double doubleHour = fractionOfDay * 24;
         int hour = (int) Math.floor(doubleHour);
@@ -109,7 +117,6 @@ public interface TimeCalc extends AngleCalc {
             }
             return utcHour / 24;
         }
-        System.out.println(inLocalDateTime);
         return inLocalDateTime;
 
     }
