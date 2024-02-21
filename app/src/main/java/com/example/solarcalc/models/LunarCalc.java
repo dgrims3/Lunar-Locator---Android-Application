@@ -341,7 +341,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         List<ZonedDateTime> zonedDateTimeList = new ArrayList<>();
         int[] positions = {time.RISING.ordinal(), time.TRANSIT.ordinal(), time.SETTING.ordinal()};
         double[] coords = {42.3601, -71.0589}; //Boston
-        LocalDate date = LocalDate.of(2024, 2, 11);
+        LocalDate date = LocalDate.of(2024, 2, 6);
 
         for (int position: positions
              ) {
