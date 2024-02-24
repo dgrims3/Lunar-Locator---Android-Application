@@ -6,7 +6,6 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 
-import java.time.temporal.JulianFields;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

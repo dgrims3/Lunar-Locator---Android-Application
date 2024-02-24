@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
 
         checkLocationPermission();
         solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(user.getCurrentJD(), -95.852966, user.getOffSet())).toString());
-        List<ZonedDateTime> moonTimes = user.calcMoonTimes();
+        List<ZonedDateTime> moonTimes = user.calcMoonTimes(user.getLat(), user.getLng(), 2024, 2, 1);
         moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
         moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
         moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));

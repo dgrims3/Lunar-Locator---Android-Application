@@ -25,7 +25,7 @@ public interface TimeCalc extends AngleCalc {
             year -= 1;
             month += 12;
         }
-        double A = Math.floor(year / 100);
+        double A = Math.floor(year / 100.0);
         double B = 2 - A + Math.floor(A / 4);
         return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
     }
@@ -80,16 +80,7 @@ public interface TimeCalc extends AngleCalc {
     @RequiresApi(api = Build.VERSION_CODES.O)
     default String dateTimeToString(ZonedDateTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss ");
-        String formattedDateTime = time.format(formatter);
-        return formattedDateTime;
-    }
-
-    default void fractionOfDayToTime (double fractionOfDay) {
-        double doubleHour = fractionOfDay * 24;
-        int hour = (int) Math.floor(doubleHour);
-        double doubleMinute = 60 * (doubleHour - hour);
-        int minute = (int) Math.floor(doubleMinute);
-        System.out.println(Integer.toString(hour) + ":" + Integer.toString(minute));
+        return time.format(formatter);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -107,7 +98,7 @@ public interface TimeCalc extends AngleCalc {
         ZonedDateTime inLocalDateTime = dateTimeInUTC.withZoneSameInstant(zoneId);
         if (returnAsFraction) {
             float utcHour = dateTimeInUTC.getHour();
-            float utcMinute = dateTimeInUTC.getMinute() / 60;
+            float utcMinute = (float) dateTimeInUTC.getMinute() / 60;
             utcHour += utcMinute;
             if (date.getDayOfMonth() < inLocalDateTime.getDayOfMonth()) {
                 utcHour += 24;

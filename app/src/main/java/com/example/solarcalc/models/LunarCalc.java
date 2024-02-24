@@ -16,7 +16,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
 
     enum position {ASCENSION, DECLINATION}
 
-    enum time {RISING, TRANSIT, SETTING}
+    enum time {RISE, TRANSIT, SET}
 
     enum coords {LAT, LNG, DISTANCE}
 
@@ -260,7 +260,6 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     // This can get added to the moon's longitude from greater accuracy. Currently the number returned is angle seconds and should be converted to degrees.
-    // page 151 || 143
     default double nutation_in_longitude(double jce) {
         double node = moon_ascending_node(jce);
         double L = deg2rad(280.4665 + (36000.7698 * jce));
@@ -319,29 +318,12 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return new double[]{rising, transit, setting};
     }
 
-    default double[] interpolate(double m, double[] one, double[] two, double[] three) {
-        double n = m + (56.0 / 86400);
-        double aAsc = two[0] - one[0];
-        double bAsc = three[0] - two[0];
-        double cAsc = bAsc - aAsc;
-
-        double asc = two[0] + (n / 2) * (aAsc + bAsc + (cAsc * n));
-
-        double aDec = two[1] - one[1];
-        double bDec = three[1] - two[1];
-        double cDec = bDec - aDec;
-
-        double dec = two[1] + (n / 2) * (aDec + bDec + (cDec * n));
-        return new double[]{asc, dec};
-
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default List<ZonedDateTime> calcMoonTimes() {
+    default List<ZonedDateTime> calcMoonTimes(double lat, double lng, int year, int month, int day) {
         List<ZonedDateTime> zonedDateTimeList = new ArrayList<>();
-        int[] positions = {time.RISING.ordinal(), time.TRANSIT.ordinal(), time.SETTING.ordinal()};
-        double[] coords = {42.3601, -71.0589}; //Boston
-        LocalDate date = LocalDate.of(2024, 2, 6);
+        int[] positions = {time.RISE.ordinal(), time.TRANSIT.ordinal(), time.SET.ordinal()};
+        double[] coords = {lat, lng};
+        LocalDate date = LocalDate.of(year, month, day);
 
         for (int position: positions
              ) {
