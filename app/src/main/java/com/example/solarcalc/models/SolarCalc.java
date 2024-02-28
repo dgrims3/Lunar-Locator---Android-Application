@@ -2,7 +2,7 @@ package com.example.solarcalc.models;
 
 public interface SolarCalc extends TimeCalc{
 
-    default double calcSolNoon(double jd, double longitude, int timezone) {
+    default double calcSolNoon(double longitude, int timezone, double jd) {
         double tNoon = calcTimeJulianCent(jd - (longitude / 360.0));
         double eqTime = calcEquationOfTime(tNoon);
         double solNoonOffset = 720.0 - (longitude * 4) - eqTime; // in minutes

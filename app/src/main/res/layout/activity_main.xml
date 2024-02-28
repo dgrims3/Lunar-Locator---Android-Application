@@ -1,91 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/location_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/location_toggle_text"
+        android:textOff="@string/custom_location"
+        android:textOn="@string/my_location" />
+
+    <LinearLayout
+        android:id="@+id/custom_input"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/custom_lat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/rounded_border_text_view"
+            android:gravity="center"
+            android:hint="@string/custom_lat_hint"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/custom_long"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/rounded_border_text_view"
+            android:gravity="center"
+            android:hint="@string/custom_long_hint"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/divider_color" />
 
     <TextView
         android:id="@+id/solar_noon_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Solar Transit"
+        android:layout_marginBottom="8dp"
+        android:text="@string/solar_transit_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/solar_noon_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:text="@string/empty_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/solar_noon_text"/>
+        android:textSize="18sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/divider_color" />
 
     <TextView
         android:id="@+id/moon_rise_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Moon Rise"
+        android:layout_marginBottom="8dp"
+        android:text="@string/moon_rise_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/solar_noon_text_view"/>
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/moon_rise_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:text="@string/empty_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/moon_rise_text"/>
+        android:textSize="18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
     <TextView
         android:id="@+id/moon_transit_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Moon Transit"
+        android:layout_marginBottom="8dp"
+        android:text="@string/moon_transit_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/moon_rise_text_view"/>
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/moon_transit_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:text="@string/empty_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/moon_transit_text"/>
+        android:textSize="18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
     <TextView
         android:id="@+id/moon_set_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Moon Set"
+        android:layout_marginBottom="8dp"
+        android:text="@string/moon_set_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/moon_transit_text_view"/>
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/moon_set_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:text="@string/empty_text_view"
         android:textColor="@color/black"
-        android:textSize="44sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/moon_set_text"/>
+        android:textSize="18sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
-</RelativeLayout>
+</LinearLayout>

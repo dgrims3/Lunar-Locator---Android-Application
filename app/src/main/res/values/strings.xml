@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">SolarCalc</string>
+    <string name="solar_transit_text_view">Solar Transit</string>
+    <string name="moon_rise_text_view">Moon Rise</string>
+    <string name="moon_transit_text_view">Moon Transit</string>
+    <string name="moon_set_text_view">Moon Set</string>
+    <string name="empty_text_view">--:--</string>
+    <string name="my_location">Custom Location</string>
+    <string name="custom_location">Custom Location</string>
+    <string name="location_toggle_text">Custom Location</string>
+    <string name="custom_lat_hint">Latitude</string>
+    <string name="custom_long_hint">Longitude</string>
 </resources>
