@@ -39,7 +39,7 @@ public interface TimeCalc extends AngleCalc {
         double C;
         double D;
         double E;
-        double F = (double) jd % 1;
+        double F = jd % 1;
         double Z = Math.floor(jd);
         if (Z >= 2299161) {
             double val = Math.floor(((Z - 1867216.25) / 36524.25));

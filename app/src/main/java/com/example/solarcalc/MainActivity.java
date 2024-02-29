@@ -2,52 +2,48 @@ package com.example.solarcalc;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
 import com.example.solarcalc.models.TimeCalc;
 import com.example.solarcalc.models.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements TimeCalc {
 
     enum time {RISING, TRANSIT, SETTING}
-    enum coords {LAT,LNG}
 
     private final static int REQUEST_CODE = 99;
     PackageManager packageManager;
-    TextView solar_noon_text_view, moon_rise_text_view, moon_transit_text_view, moon_set_text_view;
-    SwitchCompat location_toggle;
-    LinearLayout custom_input;
+    TextView solar_noon_text_view, moon_rise_text_view, moon_transit_text_view, moon_set_text_view, latitude_text_view, longitude_text_view, date_text_view;
+    AppCompatButton get_date_picker_button, calculate_moon_position_button, get_map_button;
     User user;
     Calendar today;
     List<ZonedDateTime> moonTimes;
     FusedLocationProviderClient fusedLocationProviderClient;
-    double[] userLatLng, customLatLng;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -59,44 +55,68 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
 
         user = new User(this);
 
-        location_toggle = findViewById(R.id.location_toggle);
-        custom_input = findViewById(R.id.custom_input);
+        today = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        get_date_picker_button = findViewById(R.id.get_date_picker_button);
+        get_map_button = findViewById(R.id.get_map_button);
+        calculate_moon_position_button = findViewById(R.id.calculate_moon_position_button);
         solar_noon_text_view = findViewById(R.id.solar_noon_text_view);
         moon_rise_text_view = findViewById(R.id.moon_rise_text_view);
         moon_transit_text_view = findViewById(R.id.moon_transit_text_view);
         moon_set_text_view = findViewById(R.id.moon_set_text_view);
-        today = Calendar.getInstance();
-        custom_input.setVisibility(View.GONE);
-        location_toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        // Handle the switch state change here
-                        if (isChecked) {
-                            custom_input.setVisibility(View.VISIBLE);
-                        } else {
-                            custom_input.setVisibility(View.GONE);
-                        }
-                    }
-                });
+        latitude_text_view = findViewById(R.id.latitude_text_view);
+        longitude_text_view = findViewById(R.id.longitude_text_view);
+        date_text_view = findViewById(R.id.date_text_view);
+
+        setDateTextView(today);
+
+
+        get_date_picker_button.setOnClickListener(view -> {
+            DatePickerDialog dialog = new DatePickerDialog(MainActivity.this,
+                    (datePicker, i, i1, i2) -> {
+                        Calendar selectedDate = Calendar.getInstance();
+                        selectedDate.set(i, i1, i2);
+                        setDateTextView(selectedDate);
+                    },
+                    Calendar.getInstance().get(Calendar.YEAR),
+                    Calendar.getInstance().get(Calendar.MONTH),
+                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+            dialog.show();
+        });
+
+        calculate_moon_position_button.setOnClickListener(view -> {
+            Date date = null;
+            try {
+                date = dateFormat.parse(String.valueOf(date_text_view.getText()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Calendar calendar = Calendar.getInstance();
+            if (date != null) {
+                calendar.setTime(date);
+            } else {
+                calendar = today;
+            }
+            moonTimes = user.calcMoonTimes(Double.parseDouble(String.valueOf(latitude_text_view.getText())), Double.parseDouble(String.valueOf(longitude_text_view.getText())),
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH));
+
+            solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(-95.848160, user.getOffSet(), getJDFromCalenderDate(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH)))).toString());
+            moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
+            moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
+            moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));
+        });
+
         getUserLocationAndCalculateMoonTimes(new LocationCallback() {
             @Override
             public void onLocationReceived(Location location) {
-                // Handle the received location
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                // Calculate moon times using received location
-                moonTimes = user.calcMoonTimes(latitude, longitude,
-                        today.get(Calendar.YEAR),
-                        today.get(Calendar.MONTH) + 1,
-                        today.get(Calendar.DAY_OF_MONTH));
-
-                solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(-95.848160, user.getOffSet(), getJDFromCalenderDate(
-                        today.get(Calendar.YEAR),
-                        today.get(Calendar.MONTH) + 1,
-                        today.get(Calendar.DAY_OF_MONTH)))).toString());
-                moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
-                moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
-                moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));
+                latitude_text_view.setText(String.valueOf(location.getLatitude()));
+                longitude_text_view.setText(String.valueOf(location.getLongitude()));
             }
             @Override
             public void onLocationError(String errorMessage) {
@@ -105,7 +125,15 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         });
     }
 
-    private void getUserLocationAndCalculateMoonTimes(final LocationCallback callback){
+    private void setDateTextView(Calendar calendar) {
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        String formattedDate = String.format("%s-%s-%s", year, month, day);
+        date_text_view.setText(formattedDate);
+    }
+
+    private void getUserLocationAndCalculateMoonTimes(final LocationCallback callback) {
         checkLocationPermission();
         fusedLocationProviderClient.getCurrentLocation(102, new CancellationToken() {
             @NonNull
@@ -131,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
 
     interface LocationCallback {
         void onLocationReceived(Location location);
+
         void onLocationError(String errorMessage);
     }
 

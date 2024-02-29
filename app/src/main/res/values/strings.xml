@@ -10,4 +10,7 @@
     <string name="location_toggle_text">Custom Location</string>
     <string name="custom_lat_hint">Latitude</string>
     <string name="custom_long_hint">Longitude</string>
+    <string name="get_date_picker_button_text">Choose Date</string>
+    <string name="get_map_text">Choose Location</string>
+    <string name="calculate_moon_position_button_text">Calculate</string>
 </resources>
