@@ -1,12 +1,27 @@
+buildscript {
+    dependencies {
+        classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+    }
+}
+
 plugins {
     id 'com.android.application'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
-    compileSdk 33
+    signingConfigs {
+        debug {
+            storeFile file('/home/david/keystore/upload-keystore.jks')
+            storePassword 'Theraininspain1!'
+            keyAlias 'upload'
+            keyPassword 'Theraininspain1!'
+        }
+    }
+    compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.solarcalc"
+        applicationId "com.example.LunarLocator"
         minSdk 23
         targetSdk 33
         versionCode 1
@@ -19,23 +34,35 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
+
+    buildFeatures {
+        buildConfig true
+        // ...
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding true
+    }
+    namespace 'com.example.LunarLocator'
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
 
     // https://mvnrepository.com/artifact/com.github.bfsmith/geotimezone
     implementation group: 'com.github.bfsmith', name: 'geotimezone', version: '1.0.3'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

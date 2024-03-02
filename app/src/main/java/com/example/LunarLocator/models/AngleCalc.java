@@ -1,6 +1,4 @@
-package com.example.solarcalc.models;
-
-import java.time.LocalDate;
+package com.example.LunarLocator.models;
 
 public interface AngleCalc {
     double obliquityOfEcliptic = 23.440636; // ε

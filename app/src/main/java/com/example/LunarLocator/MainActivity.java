@@ -1,8 +1,9 @@
-package com.example.solarcalc;
+package com.example.LunarLocator;
 
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -16,8 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
-import com.example.solarcalc.models.TimeCalc;
-import com.example.solarcalc.models.User;
+import com.example.LunarLocator.models.TimeCalc;
+import com.example.LunarLocator.models.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
@@ -83,6 +84,11 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                     Calendar.getInstance().get(Calendar.MONTH),
                     Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
             dialog.show();
+        });
+
+        get_map_button.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(intent);
         });
 
         calculate_moon_position_button.setOnClickListener(view -> {

@@ -1,4 +1,4 @@
-package com.example.solarcalc.models;
+package com.example.LunarLocator.models;
 
 import android.os.Build;
 
