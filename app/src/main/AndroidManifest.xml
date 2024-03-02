@@ -34,7 +34,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBq281wsbHFseMtzx1NtE2QELAhl3j_Vkc" />
+            android:value="MAPS_API_KEY" />
 
         <activity
             android:name="com.example.LunarLocator.MapsActivity"

@@ -1,4 +1,4 @@
-package com.example.solarcalc;
+package com.example.LunarLocator;
 
 import org.junit.Test;
 
