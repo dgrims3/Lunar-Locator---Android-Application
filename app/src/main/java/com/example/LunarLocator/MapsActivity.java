@@ -1,7 +1,10 @@
 package com.example.LunarLocator;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.LunarLocator.databinding.ActivityMapsBinding;
@@ -12,40 +15,53 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
-    private ActivityMapsBinding binding;
+    private ArrayList<Double> latLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        com.example.LunarLocator.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Intent intentFromMain = getIntent();
+        latLng = (ArrayList<Double>) intentFromMain.getSerializableExtra("latLng");
+
+        AppCompatButton map_select_button = findViewById(R.id.map_select_button);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        map_select_button.setOnClickListener(view -> {
+            Intent intentToMain = new Intent(MapsActivity.this, MainActivity.class);
+            intentToMain.putExtra("latLng", latLng);
+            startActivity(intentToMain);
+        });
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
+        LatLng userLatLng = new LatLng(latLng.get(0), latLng.get(1));
+        mMap.addMarker(new MarkerOptions().position(userLatLng).title("Current Position"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.setOnMapClickListener(this);
+    }
+
+
+    @Override
+    public void onMapClick(@NonNull LatLng selectedLatLng) {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(selectedLatLng).title("Chosen Location"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedLatLng));
+        latLng.add(0, selectedLatLng.latitude);
+        latLng.add(1, selectedLatLng.longitude);
     }
 }

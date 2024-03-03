@@ -14,4 +14,5 @@
     <string name="get_map_text">Choose Location</string>
     <string name="calculate_moon_position_button_text">Calculate</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="map_select_button_string">Select Location</string>
 </resources>
