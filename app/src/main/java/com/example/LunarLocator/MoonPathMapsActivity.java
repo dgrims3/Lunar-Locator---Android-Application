@@ -3,6 +3,7 @@ package com.example.LunarLocator;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.ImageButton;
 
 import com.example.LunarLocator.databinding.ActivityMoonPathMapsBinding;
 import com.example.LunarLocator.models.MoonLocator;
@@ -31,6 +33,7 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
     private GoogleMap mMap;
     private MoonLocator moonLocator;
 
+    private ImageButton backButton;
     LocalDate localDate;
     private ActivityMoonPathMapsBinding binding;
     private ArrayList<Double> latLng;
@@ -41,6 +44,7 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         com.example.LunarLocator.databinding.ActivityMoonPathMapsBinding binding = ActivityMoonPathMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        backButton = findViewById(R.id.backButton);
         moonLocator = new MoonLocator(this);
         localDate = LocalDate.now();
 
@@ -50,6 +54,10 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
+        backButton.setOnClickListener(view -> {
+            Intent intentToMain = new Intent(MoonPathMapsActivity.this, MainActivity.class);
+            startActivity(intentToMain);
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
