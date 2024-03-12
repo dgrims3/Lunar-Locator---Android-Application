@@ -15,4 +15,6 @@
     <string name="calculate_moon_position_button_text">Calculate</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="map_select_button_string">Select Location</string>
+    <string name="title_activity_maps_moon_path">MapsActivityMoonPath</string>
+    <string name="view_on_map">View on Map</string>
 </resources>

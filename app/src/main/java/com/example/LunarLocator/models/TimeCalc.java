@@ -62,8 +62,21 @@ public interface TimeCalc extends AngleCalc {
         return limit_degrees(((((float) 1 / 38710000) * jce + .000387933) * jce + 36000.770053608) * jce + 100.46061837);
     }
 
+    default double greenwichApparentSiderealTime(double jce) {
+        double nutation = degToRad(nutation_in_longitude(jce));
+        double obOfEcliptic = degToRad(obliquityOfEcliptic(jce));
+        double meanSidereal = greenwichMeanSiderealTime(jce);
+        double equationOfEquinox = radToDeg(nutation * (Math.cos(obOfEcliptic)));
+        return meanSidereal + equationOfEquinox;
+    }
     default double siderealTimeAtInstantAtGreenwichInDegrees(double siderealTime, double fractionOfDay) {
         return limit_degrees(siderealTime + (360.985647 * fractionOfDay));
+    }
+    default double[] degreesToHoursMinutesSeconds(double degrees) {
+        double hours = Math.floor(degrees / 15);
+        double minutes = Math.floor(((degrees / 15) - hours) * 60);
+        double seconds = ((((degrees / 15) - hours) * 60) - minutes) * 60;
+        return new double[]{hours, minutes, seconds};
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

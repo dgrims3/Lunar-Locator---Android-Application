@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.FragmentActivity;
 
-import com.example.LunarLocator.databinding.ActivityMapsBinding;
+import com.example.LunarLocator.databinding.ActivityLocationMapsBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -17,7 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
+public class LocationMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
     private ArrayList<Double> latLng;
@@ -25,7 +25,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        com.example.LunarLocator.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        com.example.LunarLocator.databinding.ActivityLocationMapsBinding binding = ActivityLocationMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Intent intentFromMain = getIntent();
@@ -39,7 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         map_select_button.setOnClickListener(view -> {
-            Intent intentToMain = new Intent(MapsActivity.this, MainActivity.class);
+            Intent intentToMain = new Intent(LocationMapsActivity.this, MainActivity.class);
             intentToMain.putExtra("latLng", latLng);
             startActivity(intentToMain);
         });
@@ -51,7 +51,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng userLatLng = new LatLng(latLng.get(0), latLng.get(1));
         mMap.addMarker(new MarkerOptions().position(userLatLng).title("Current Position"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
-
         mMap.setOnMapClickListener(this);
     }
 
@@ -64,4 +63,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         latLng.add(0, selectedLatLng.latitude);
         latLng.add(1, selectedLatLng.longitude);
     }
+
 }

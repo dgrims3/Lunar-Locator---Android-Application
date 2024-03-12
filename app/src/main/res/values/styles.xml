@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Your main app theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!-- Define other attributes for your main theme -->
+        <!-- For example, you may have defined textColorPrimary here -->
+    </style>
+</resources>

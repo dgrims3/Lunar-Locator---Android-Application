@@ -10,4 +10,9 @@
     <color name="divider_color">#F0F0F0</color>
     <color name="your_thumb_color">#c89666</color>
     <color name="your_track_color">#2d545e</color>
+    <color name="color_primary">#3ab1c8</color>
+    <color name="button_color_primary">#FFFFFFFF</color>
+    <color name="button_color_secondary">#168AFF</color>
+    <color name="textColorPrimary">#FF000000</color>
+    <color name="textColorSecondary">#FFFFFFFF</color>
 </resources>

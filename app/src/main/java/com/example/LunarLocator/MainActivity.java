@@ -3,11 +3,16 @@ package com.example.LunarLocator;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,9 +21,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.LunarLocator.models.TimeCalc;
-import com.example.LunarLocator.models.User;
+import com.example.LunarLocator.models.MoonLocator;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
@@ -32,6 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity implements TimeCalc {
@@ -39,32 +46,33 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
     enum time {RISING, TRANSIT, SETTING}
 
     private final static int REQUEST_CODE = 99;
-    private TextView solar_noon_text_view, moon_rise_text_view, moon_transit_text_view, moon_set_text_view, latitude_text_view, longitude_text_view, date_text_view;
-    private User user;
+    private TextView moon_rise_text_view, moon_transit_text_view, moon_set_text_view, latitude_text_view, longitude_text_view, date_text_view;
+    private MoonLocator moonLocator;
     private Calendar today;
     private List<ZonedDateTime> moonTimes;
-
     public ArrayList<Double> latLng;
+    private BroadcastReceiver locationChangeReceiver;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PackageManager packageManager = getPackageManager();
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         setContentView(R.layout.activity_main);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        Intent intentFromLocationMap = getIntent();
+        moonLocator = new MoonLocator(this);
 
-        user = new User(this);
-        latLng = new ArrayList<Double>();
-
+        latLng = new ArrayList<>();
         today = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         AppCompatButton get_date_picker_button = findViewById(R.id.get_date_picker_button);
         AppCompatButton get_map_button = findViewById(R.id.get_map_button);
         AppCompatButton calculate_moon_position_button = findViewById(R.id.calculate_moon_position_button);
-        solar_noon_text_view = findViewById(R.id.solar_noon_text_view);
+        AppCompatButton view_moon_on_map_button = findViewById(R.id.view_moon_on_map_button);
+
         moon_rise_text_view = findViewById(R.id.moon_rise_text_view);
         moon_transit_text_view = findViewById(R.id.moon_transit_text_view);
         moon_set_text_view = findViewById(R.id.moon_set_text_view);
@@ -73,8 +81,6 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         date_text_view = findViewById(R.id.date_text_view);
 
         setDateTextView(today);
-
-        Intent intentFromMap = getIntent();
 
         get_date_picker_button.setOnClickListener(view -> {
             DatePickerDialog dialog = new DatePickerDialog(MainActivity.this,
@@ -90,45 +96,81 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         });
 
         get_map_button.setOnClickListener(view -> {
-            Intent intentToMap = new Intent(MainActivity.this, MapsActivity.class);
-            intentToMap.putExtra("latLng", latLng);
-            startActivity(intentToMap);
+            Intent intentToLocationMap = new Intent(MainActivity.this, LocationMapsActivity.class);
+            if (latLng.isEmpty()) {
+                latLng.add(0, 0.0);
+                latLng.add(1, 0.0);
+            }
+            intentToLocationMap.putExtra("latLng", latLng);
+            startActivity(intentToLocationMap);
         });
 
         calculate_moon_position_button.setOnClickListener(view -> {
-            Date date = null;
-            try {
-                date = dateFormat.parse(String.valueOf(date_text_view.getText()));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            Calendar calendar = Calendar.getInstance();
-            if (date != null) {
-                calendar.setTime(date);
+            if (latitude_text_view.getText().toString().isEmpty() || longitude_text_view.getText().toString().isEmpty()){
+                Toast.makeText(this, "Choose Location or Enable Phone's Location Service", Toast.LENGTH_SHORT).show();
             } else {
-                calendar = today;
-            }
-            moonTimes = user.calcMoonTimes(Double.parseDouble(String.valueOf(latitude_text_view.getText())), Double.parseDouble(String.valueOf(longitude_text_view.getText())),
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH));
+                Date date;
+                try {
+                    date = dateFormat.parse(String.valueOf(date_text_view.getText()));
+                } catch (ParseException e) {
+                    return;
+                }
+                Calendar calendar = Calendar.getInstance();
+                if (date != null) {
+                    calendar.setTime(date);
+                } else {
+                    calendar = today;
+                }
+                moonTimes = moonLocator.calcMoonTimes(Double.parseDouble(String.valueOf(latitude_text_view.getText())), Double.parseDouble(String.valueOf(longitude_text_view.getText())),
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.DAY_OF_MONTH));
 
-            solar_noon_text_view.setText(displayTimeBeautifier(user.calcSolNoon(-95.848160, user.getOffSet(), getJDFromCalenderDate(
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH)))).toString());
-            moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
-            moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
-            moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));
+                moon_rise_text_view.setText(dateTimeToString(moonTimes.get(time.RISING.ordinal())));
+                moon_transit_text_view.setText(dateTimeToString(moonTimes.get(time.TRANSIT.ordinal())));
+                moon_set_text_view.setText(dateTimeToString(moonTimes.get(time.SETTING.ordinal())));
+            }
         });
 
-        if (intentFromMap != null && intentFromMap.hasExtra("latLng") && latLng != null) {
-            latLng = (ArrayList<Double>) intentFromMap.getSerializableExtra("latLng");
+        view_moon_on_map_button.setOnClickListener(view -> {
+            Intent intentToMoonPathMap = new Intent(MainActivity.this, MoonPathMapsActivity.class);
+            startActivity(intentToMoonPathMap);
+        });
 
-            latitude_text_view.setText(String.valueOf(latLng.get(0)));
-            longitude_text_view.setText(String.valueOf(latLng.get(1)));
+        locationChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Objects.equals(intent.getAction(), LocationManager.PROVIDERS_CHANGED_ACTION)) {
+                    getUserLocation(new LocationCallback() {
+                        @Override
+                        public void onLocationReceived(Location location) {
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            if (latitude_text_view.getText().toString().isEmpty() &&
+                                longitude_text_view.getText().toString().isEmpty()) {
+                                latitude_text_view.setText(String.valueOf(latitude));
+                                longitude_text_view.setText(String.valueOf(longitude));
+                                latLng.add(0,latitude);
+                                latLng.add(1,longitude);
+                            }
+                        }
+                        @Override
+                        public void onLocationError(String errorMessage) {
+                            Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        };
+        registerReceiver(locationChangeReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+
+        if (intentFromLocationMap != null && intentFromLocationMap.hasExtra("latLng") && latLng != null) {
+            latLng = (ArrayList<Double>) intentFromLocationMap.getSerializableExtra("latLng");
+
+            latitude_text_view.setText(String.valueOf(latLng != null ? latLng.get(0) : null));
+            longitude_text_view.setText(String.valueOf(latLng != null ? latLng.get(1) : null));
         } else {
-            getUserLocationAndCalculateMoonTimes(new LocationCallback() {
+            getUserLocation(new LocationCallback() {
                 @Override
                 public void onLocationReceived(Location location) {
                     double latitude = location.getLatitude();
@@ -145,7 +187,16 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             });
         }
 
+        swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
+            swipeRefreshLayout.setRefreshing(false);
+        }, 1000));
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(locationChangeReceiver);
     }
 
     private void setDateTextView(Calendar calendar) {
@@ -156,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         date_text_view.setText(formattedDate);
     }
 
-    private void getUserLocationAndCalculateMoonTimes(final LocationCallback callback) {
+    private void getUserLocation(final LocationCallback callback) {
         checkLocationPermission();
         fusedLocationProviderClient.getCurrentLocation(102, new CancellationToken() {
             @NonNull
@@ -164,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
                 return null;
             }
-
             @Override
             public boolean isCancellationRequested() {
                 return false;
@@ -215,6 +265,21 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_CODE
         );
+        getUserLocation(new LocationCallback() {
+            @Override
+            public void onLocationReceived(Location location) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                latitude_text_view.setText(String.valueOf(latitude));
+                longitude_text_view.setText(String.valueOf(longitude));
+                latLng.add(0,latitude);
+                latLng.add(1,longitude);
+            }
+            @Override
+            public void onLocationError(String errorMessage) {
+                Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

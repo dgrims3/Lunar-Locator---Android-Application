@@ -18,10 +18,9 @@ public interface SolarCalc extends TimeCalc{
         return solNoonLocal;
     }
 
-
-
     default double calcEquationOfTime(double jce) {
-        double epsilon = calcObliquityCorrection(jce);
+        double epsilon = obliquityOfEcliptic(jce);
+        System.out.println(epsilon);
         double l0 = calcGeomMeanLongSun(jce);
         double e = calcEccentricityEarthOrbit(jce);
         double m = calcGeomMeanAnomalySun(jce);
@@ -37,25 +36,6 @@ public interface SolarCalc extends TimeCalc{
 
         double Etime = y * sin2l0 - 2.0 * e * sinm + 4.0 * e * y * sinm * cos2l0 - 0.5 * y * y * sin4l0 - 1.25 * e * e * sin2m;
         return radToDeg(Etime) * 4.0;    // in minutes of time
-    }
-
-    default double calcObliquityCorrection(double jce) {
-        double e0 = calcMeanObliquityOfEcliptic(jce);
-        double omega = 125.04 - 1934.136 * jce;
-        return e0 + 0.00256 * Math.cos(degToRad(omega));        // in degrees
-    }
-
-    default double calcMeanObliquityOfEcliptic(double jce) {
-        double seconds = 21.448 - jce * (46.8150 + jce * (0.00059 - jce * (0.001813)));
-        return 23.0 + (26.0 + (seconds / 60.0)) / 60.0;        // in degrees
-    }
-
-    default double degToRad(double angleDeg) {
-        return (Math.PI * angleDeg / 180.0);
-    }
-
-    default double radToDeg(double angleRad) {
-        return (180.0 * angleRad / Math.PI);
     }
 
     default double calcGeomMeanLongSun(double jce) {

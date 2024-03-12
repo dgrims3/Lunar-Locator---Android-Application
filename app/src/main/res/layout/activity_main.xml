@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress ALL -->
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,8 +21,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:textColor="?android:attr/textColorPrimary"
-
-            android:background="@drawable/rounded_border_text_view"
+            android:background="@drawable/rounded_border_button"
+            android:backgroundTint="@color/button_color_primary"
             android:text="@string/get_date_picker_button_text"
             android:gravity="center"/>
 
@@ -41,7 +47,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:textColor="?android:attr/textColorPrimary"
-            android:background="@drawable/rounded_border_text_view"
+            android:background="@drawable/rounded_border_button"
+            android:backgroundTint="@color/button_color_primary"
             android:text="@string/get_map_text"
             android:gravity="center"
             android:layout_below="@id/date_text_view"/>
@@ -79,7 +86,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
-            android:background="@drawable/rounded_border_text_view"
+            android:background="@drawable/rounded_border_button"
+            android:backgroundTint="@color/button_color_primary"
             android:textColor="?android:attr/textColorPrimary"
             android:text="@string/calculate_moon_position_button_text"
             android:gravity="center"
@@ -96,36 +104,6 @@
         android:layout_below="@id/calculate_moon_position_button"/>
 
     <TextView
-        android:id="@+id/solar_noon_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:text="@string/solar_transit_text_view"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_below="@id/divider1"/>
-
-    <TextView
-        android:id="@+id/solar_noon_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/empty_text_view"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"
-        android:gravity="center"
-        android:layout_below="@id/solar_noon_text"/>
-
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider_color"
-        android:layout_below="@id/solar_noon_text_view"/>
-
-    <TextView
         android:id="@+id/moon_rise_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -135,7 +113,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_below="@id/divider2"/>
+        android:layout_below="@id/divider1"/>
 
     <TextView
         android:id="@+id/moon_rise_text_view"
@@ -215,4 +193,47 @@
         android:background="@color/divider_color"
         android:layout_below="@id/moon_set_text_view"/>
 
+    <TextView
+        android:id="@+id/solar_noon_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text=""
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_below="@id/divider5"/>
+
+    <TextView
+        android:id="@+id/solar_noon_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text=""
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_below="@id/solar_noon_text"/>
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color"
+        android:layout_below="@id/solar_noon_text_view"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/view_moon_on_map_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
+        android:textColor="?android:attr/textColorSecondary"
+        android:backgroundTint="@color/button_color_secondary"
+        android:text="@string/view_on_map" />
+
 </RelativeLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

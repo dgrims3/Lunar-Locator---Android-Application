@@ -168,9 +168,6 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return (((a * jce + b) * jce + c) * jce + d) * jce + e;
     }
 
-    default double moon_ascending_node(double jce) {
-        return rad2deg(Math.sin(deg2rad((125.04452 - (1934.136261 * jce) + .0020708 / 450000))));
-    }
 
     default double sun_mean_longitude_L(double jce) {
         return limit_degrees(280.4664 + 36000.7698 * jce);
@@ -215,17 +212,17 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
 
     default double additiveToMoonLat(double jce) {
         return ((-2235 * Math.sin(moon_mean_longitude_L_PRIME(jce))) +
-                (382 * Math.sin(deg2rad(summationAdditiveA3(jce)))) +
-                (175 * Math.sin(deg2rad(summationAdditiveA1(jce) - moon_latitude_argument_F(jce)))) +
-                (175 * Math.sin(deg2rad(summationAdditiveA1(jce) + moon_latitude_argument_F(jce)))) +
-                (127 * Math.sin(deg2rad(moon_mean_longitude_L_PRIME(jce) - moon_mean_anomaly_M_PRIME(jce)))) -
-                (115 * Math.sin(deg2rad(moon_mean_longitude_L_PRIME(jce) + moon_mean_anomaly_M_PRIME(jce)))));
+                (382 * Math.sin(degToRad(summationAdditiveA3(jce)))) +
+                (175 * Math.sin(degToRad(summationAdditiveA1(jce) - moon_latitude_argument_F(jce)))) +
+                (175 * Math.sin(degToRad(summationAdditiveA1(jce) + moon_latitude_argument_F(jce)))) +
+                (127 * Math.sin(degToRad(moon_mean_longitude_L_PRIME(jce) - moon_mean_anomaly_M_PRIME(jce)))) -
+                (115 * Math.sin(degToRad(moon_mean_longitude_L_PRIME(jce) + moon_mean_anomaly_M_PRIME(jce)))));
     }
 
     default double additiveToMoonLng(double jce) {
-        return ((3958 * Math.sin(deg2rad(summationAdditiveA1(jce)))) +
-                (1962 * Math.sin(deg2rad(moon_mean_longitude_L_PRIME(jce) - moon_latitude_argument_F(jce)))) +
-                (318 * Math.sin(deg2rad(summationAdditiveA2(jce)))));
+        return ((3958 * Math.sin(degToRad(summationAdditiveA1(jce)))) +
+                (1962 * Math.sin(degToRad(moon_mean_longitude_L_PRIME(jce) - moon_latitude_argument_F(jce)))) +
+                (318 * Math.sin(degToRad(summationAdditiveA2(jce)))));
     }
 
     default double[] moon_periodic_term_summation(double d, double m, double m_prime, double f, double jce, double[][] terms) {
@@ -235,7 +232,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         cos_sum = 0;
         for (int i = 0; i < COUNT; i++) {
             e_mult = Math.pow(e, Math.abs(terms[i][Term.TERM_M.ordinal()]));
-            trig_arg = deg2rad(terms[i][Term.TERM_D.ordinal()] * d + terms[i][Term.TERM_M.ordinal()] * m + terms[i][Term.TERM_MPR.ordinal()] * m_prime + terms[i][Term.TERM_F.ordinal()] * f);
+            trig_arg = degToRad(terms[i][Term.TERM_D.ordinal()] * d + terms[i][Term.TERM_M.ordinal()] * m + terms[i][Term.TERM_MPR.ordinal()] * m_prime + terms[i][Term.TERM_F.ordinal()] * f);
             sin_sum += e_mult * terms[i][Term.TERM_LB.ordinal()] * Math.sin(trig_arg);
             cos_sum += e_mult * terms[i][Term.TERM_R.ordinal()] * Math.cos(trig_arg);
         }
@@ -259,13 +256,6 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return Math.asin(6378.14 / distance);
     }
 
-    // This can get added to the moon's longitude from greater accuracy. Currently the number returned is angle seconds and should be converted to degrees.
-    default double nutation_in_longitude(double jce) {
-        double node = moon_ascending_node(jce);
-        double L = deg2rad(280.4665 + (36000.7698 * jce));
-        double LPR = deg2rad(218.3165 + (481267.8813 * jce));
-        return rad2deg(((-17.2 * Math.sin(node)) - (-1.32 * Math.sin(2 * L)) - (.23 * Math.sin(2 * LPR)) + (.21 * Math.sin(2 * node))));
-    }
 
     // page 340/351
     default double[] getMoonLatLngDist(double jd) {
@@ -291,25 +281,38 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     default double[] lunarAscensionDeclinationDistance(double jd) {
+        double jce = calcTimeJulianCent(jd);
         double[] moonLatLngDist = getMoonLatLngDist(jd);
-        double moonDeclination = getDeclination(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()]);
-        double moonRightAscension = getRightAscension(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()]);
-
+        double moonDeclination = getDeclination(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()], jce);
+        double moonRightAscension = getRightAscension(moonLatLngDist[coords.LAT.ordinal()], moonLatLngDist[coords.LNG.ordinal()], jce);
         return new double[]{moonRightAscension, moonDeclination, moonLatLngDist[coords.DISTANCE.ordinal()]};
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[] getMoonLatAndLongAtInstant (double jd, double fractionOfDay) {
+        double jce = calcTimeJulianCent(jd);
+        double gmst = greenwichMeanSiderealTime(jce);
+        double gmstAtInstant = siderealTimeAtInstantAtGreenwichInDegrees(gmst, fractionOfDay);
+        double[] ascDec = lunarAscensionDeclinationDistance(jd+fractionOfDay);
+
+        double lat = ascDec[position.DECLINATION.ordinal()];
+        double lng = -1 * (gmstAtInstant - ascDec[position.ASCENSION.ordinal()] );
+        return new double[] {lat, lng};
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     default double[] risingTransitSetting(double jd, double[] latlng, double[] lunarAscDecDist) {
         double jce = calcTimeJulianCent(jd);
         double sidereal = greenwichMeanSiderealTime(jce);
         double lunarDistance = lunarAscDecDist[coords.DISTANCE.ordinal()];
-        double standardAltitude = deg2rad(-.583 - equatorialHorizontalParallax(lunarDistance)); // deg2rad(.125); // Lunar
+        double standardAltitude = degToRad(-.583 - equatorialHorizontalParallax(lunarDistance));
 
         double lat = latlng[coords.LAT.ordinal()];
         double lng = -1 * latlng[coords.LNG.ordinal()]; // reverse the longitude so it is measured positively west from Greenwich.
 
-        double localHourAngle = Math.sin(standardAltitude) - (Math.sin(deg2rad(lat)) * Math.sin(deg2rad(lunarAscDecDist[position.DECLINATION.ordinal()]))) / (Math.cos(deg2rad(lat)) * Math.cos(deg2rad(lunarAscDecDist[position.DECLINATION.ordinal()])));
-        localHourAngle = rad2deg(Math.acos(localHourAngle));
+        double localHourAngle = Math.sin(standardAltitude) - (Math.sin(degToRad(lat)) * Math.sin(degToRad(lunarAscDecDist[position.DECLINATION.ordinal()]))) / (Math.cos(degToRad(lat)) * Math.cos(degToRad(lunarAscDecDist[position.DECLINATION.ordinal()])));
+        localHourAngle = radToDeg(Math.acos(localHourAngle));
 
         double transit = getInRange((lunarAscDecDist[position.ASCENSION.ordinal()] + lng - sidereal) / 360);
         double rising = transit - (localHourAngle / 360);

@@ -9,15 +9,19 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MapsActivity" />
+        tools:context=".LocationMapsActivity" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/map_select_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
+        android:textColor="?android:attr/textColorSecondary"
+        android:backgroundTint="@color/button_color_secondary"
         android:text="@string/map_select_button_string" />
 
 </RelativeLayout>
