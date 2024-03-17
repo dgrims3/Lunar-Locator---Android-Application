@@ -195,11 +195,26 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             selectedDate = Calendar.getInstance();
             setDateTextView(selectedDate);
             latLng.clear();
-            latitude_text_view.setText(R.string.empty_text_view);
-            longitude_text_view.setText(R.string.empty_text_view);
-            moon_rise_text_view.setText(R.string.empty_text_view);
-            moon_set_text_view.setText(R.string.empty_text_view);
-            moon_transit_text_view.setText(R.string.empty_text_view);
+            latitude_text_view.setText("");
+            longitude_text_view.setText("");
+            moon_rise_text_view.setText("");
+            moon_set_text_view.setText("");
+            moon_transit_text_view.setText("");
+            getUserLocation(new LocationCallback() {
+                @Override
+                public void onLocationReceived(Location location) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    latitude_text_view.setText(String.valueOf(latitude));
+                    longitude_text_view.setText(String.valueOf(longitude));
+                    latLng.add(0,latitude);
+                    latLng.add(1,longitude);
+                }
+                @Override
+                public void onLocationError(String errorMessage) {
+                    Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
         }, 1000));
     }
 

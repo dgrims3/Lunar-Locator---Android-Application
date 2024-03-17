@@ -3,7 +3,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="125dp"
-    android:background="@color/button_color_secondary"
+    android:background="@drawable/transparent_gradient"
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -19,7 +19,9 @@
         android:id="@+id/mapMenuDatePicker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent"
         android:calendarViewShown="false"
+        android:theme="@style/AppTheme"
         android:datePickerMode="spinner"
-        android:background="@color/button_color_secondary" />
+        android:visibility="visible" />
 </androidx.appcompat.widget.Toolbar>

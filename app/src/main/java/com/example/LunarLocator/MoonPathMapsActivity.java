@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.LunarLocator.databinding.ActivityMoonPathMapsBinding;
 import com.example.LunarLocator.models.MoonLocator;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -65,14 +66,14 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         mapFragment.getMapAsync(this);
 
 
-        date_picker.init(local_date.getYear(), local_date.getMonthValue(), local_date.getDayOfMonth(), (view, year1, month1, day1) -> {
+        date_picker.init(local_date.getYear(), local_date.getMonthValue() -1, local_date.getDayOfMonth(), (view, year1, month1, day1) -> {
             if (is_processing_event) {
                 return;
             }
             is_processing_event = true;
             mMap.clear();
 
-            local_date = LocalDate.from(LocalDate.of(year1, month1, day1).atStartOfDay());
+            local_date = LocalDate.from(LocalDate.of(year1, month1 + 1, day1).atStartOfDay());
             twenty_four_hour_moon_lat_long = moon_locator.getTwentyFourHourMoonLatLongAtHourIntervals(local_date, moon_locator.getOffSet());
             plotTwentyFourHourMoonLatLong(twenty_four_hour_moon_lat_long);
             if (local_date.equals(LocalDate.now())) {
@@ -96,6 +97,9 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         twenty_four_hour_moon_lat_long = moon_locator.getTwentyFourHourMoonLatLongAtHourIntervals(local_date, moon_locator.getOffSet());
         plotCurrentMoonLatLong();
         plotTwentyFourHourMoonLatLong(twenty_four_hour_moon_lat_long);
+
+        LatLng startPosition = new LatLng(-95, 45);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(startPosition));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

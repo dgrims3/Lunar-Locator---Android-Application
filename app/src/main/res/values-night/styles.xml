@@ -5,4 +5,5 @@
         <!-- Override textColorPrimary with a different color for night mode -->
         <item name="android:textColorPrimary">#FFBB86FC</item>
     </style>
+
 </resources>
