@@ -5,6 +5,7 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -300,9 +301,37 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return new double[] {lat, lng};
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[][] getTwentyFourHourMoonLatLongAtHourIntervals(LocalDate localDate, int offset) {
+        double[][] twentyFourHourMoonLatLongAtHourIntervals = new double[24][2];
+        LocalDateTime localDateTime = localDate.atStartOfDay();
+        localDateTime = localDateTime.minusHours(offset);
+
+        for (int i = 0; i < 24; i++) {
+            double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
+            double fractionOfDay = localDateTime.getHour()/24.0;
+            double[] latLng = getMoonLatAndLongAtInstant(jd,fractionOfDay);
+            if (latLng[1] < -180) latLng[1] += 360;
+            twentyFourHourMoonLatLongAtHourIntervals[i] = latLng;
+            localDateTime = localDateTime.plusHours(1);
+        }
+        return twentyFourHourMoonLatLongAtHourIntervals;
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default double[] risingTransitSetting(double jd, double[] latlng, double[] lunarAscDecDist) {
+    default double[] getCurrentMoonLatLong(int offset) {
+        LocalDateTime localDateTime = LocalDateTime.now().minusHours(offset);
+        double fractionOfDay = localDateTimeToFractionOfDay(localDateTime);
+
+        double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
+        double[] latLng = getMoonLatAndLongAtInstant(jd,fractionOfDay);
+        if (latLng[1] < -180) latLng[1] += 360;
+        return latLng;
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[] risingTransitSettingApproximate(double jd, double[] latlng, double[] lunarAscDecDist) {
         double jce = calcTimeJulianCent(jd);
         double sidereal = greenwichMeanSiderealTime(jce);
         double lunarDistance = lunarAscDecDist[coords.DISTANCE.ordinal()];
@@ -322,11 +351,10 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default List<ZonedDateTime> calcMoonTimes(double lat, double lng, int year, int month, int day) {
+    default List<ZonedDateTime> moonRisingSettingTransitPrecise(double lat, double lng, LocalDate date) {
         List<ZonedDateTime> zonedDateTimeList = new ArrayList<>();
         int[] positions = {time.RISE.ordinal(), time.TRANSIT.ordinal(), time.SET.ordinal()};
         double[] coords = {lat, lng};
-        LocalDate date = LocalDate.of(year, month, day);
 
         for (int position: positions
              ) {
@@ -335,7 +363,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
             for (int i = 0; i <6; i++) {
                 double jd = getJDFromCalenderDate(tempDate.getYear(), tempDate.getMonthValue(), tempDate.getDayOfMonth() + timeDifference);
                 double[] td = lunarAscensionDeclinationDistance(jd);
-                double[] riseTransitSet = risingTransitSetting(jd, coords, td);
+                double[] riseTransitSet = risingTransitSettingApproximate(jd, coords, td);
                 double fractionOfDay = riseTransitSet[position];
                 if (fractionOfDay < 0) {
                     tempDate.minusDays((long) Math.abs(Math.floor(fractionOfDay)));
@@ -345,7 +373,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
                     timeDifference = (fractionOfDay - Math.floor(fractionOfDay));
                 } else timeDifference = fractionOfDay;
             }
-            zonedDateTimeList.add(position, (ZonedDateTime) localFractionOfDayFromUTCToLocal(timeDifference, tempDate, coords, false));
+            zonedDateTimeList.add(position, (ZonedDateTime) localFractionOfDayFromUTCToLocal(timeDifference, tempDate));
         }
         return zonedDateTimeList;
     }

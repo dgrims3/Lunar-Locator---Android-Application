@@ -3,7 +3,7 @@
 
     <style name="Theme.LunarLocator" parent="Theme.MaterialComponents.DayNight">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#9F33FF</item>
+        <item name="colorPrimary">#F0BEA7</item>
         <item name="colorPrimaryVariant">#070f4e</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->

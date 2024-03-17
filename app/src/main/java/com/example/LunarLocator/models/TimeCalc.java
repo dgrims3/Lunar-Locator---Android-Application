@@ -4,8 +4,6 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import com.github.bfsmith.geotimezone.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -14,7 +12,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public interface TimeCalc extends AngleCalc {
-    enum coords {LAT, LNG}
 
     default double calcTimeJulianCent(double jd) {
         return (jd - 2451545.0) / 36525.0;
@@ -80,8 +77,14 @@ public interface TimeCalc extends AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default LocalTime displayTimeBeautifier(double minutes) {
-        double doubleHour = minutes / 60;
+    default String dateTimeToString(ZonedDateTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss ");
+        return time.format(formatter);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    default LocalTime fractionOfDayToLocalTime (double fractionOfDay) {
+        double doubleHour = fractionOfDay * 24;
         int hour = (int) Math.floor(doubleHour);
         double doubleMinute = 60 * (doubleHour - hour);
         int minute = (int) Math.floor(doubleMinute);
@@ -91,15 +94,12 @@ public interface TimeCalc extends AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default String dateTimeToString(ZonedDateTime time) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss ");
-        return time.format(formatter);
+    default double localDateTimeToFractionOfDay(LocalDateTime localDateTime) {
+        return (localDateTime.getHour()+((localDateTime.getMinute() + (localDateTime.getSecond()/60.0))/60.0))/24;
     }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default Object localFractionOfDayFromUTCToLocal(double fractionOfDay, LocalDate date, double[] latlng, boolean returnAsFraction) {
-        TimeZoneLookup timeZoneLookup = new TimeZoneLookup();
-        ZoneId zoneId = ZoneId.of(timeZoneLookup.getTimeZone(latlng[coords.LAT.ordinal()], latlng[coords.LNG.ordinal()]).getResult());
+    default Object localFractionOfDayFromUTCToLocal(double fractionOfDay, LocalDate date) {
+        ZoneId zoneId = ZoneId.systemDefault();
 
         double doubleHour = fractionOfDay * 24;
         int hour = (int) Math.floor(doubleHour);
@@ -108,20 +108,7 @@ public interface TimeCalc extends AngleCalc {
         ZonedDateTime dateTimeInUTC = LocalDateTime.of(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), hour, minute)
                 .atZone(ZoneId.of("UTC"));
 
-        ZonedDateTime inLocalDateTime = dateTimeInUTC.withZoneSameInstant(zoneId);
-        if (returnAsFraction) {
-            float utcHour = dateTimeInUTC.getHour();
-            float utcMinute = (float) dateTimeInUTC.getMinute() / 60;
-            utcHour += utcMinute;
-            if (date.getDayOfMonth() < inLocalDateTime.getDayOfMonth()) {
-                utcHour += 24;
-            }
-            if (date.getDayOfMonth() > inLocalDateTime.getDayOfMonth()) {
-                utcHour -= 24;
-            }
-            return utcHour / 24;
-        }
-        return inLocalDateTime;
+        return dateTimeInUTC.withZoneSameInstant(zoneId);
 
     }
 

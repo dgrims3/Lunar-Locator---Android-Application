@@ -2,7 +2,7 @@
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="125dp"
     android:background="@color/button_color_secondary"
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
@@ -15,4 +15,11 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/baseline_arrow_back_24" />
 
+    <DatePicker
+        android:id="@+id/mapMenuDatePicker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:background="@color/button_color_secondary" />
 </androidx.appcompat.widget.Toolbar>

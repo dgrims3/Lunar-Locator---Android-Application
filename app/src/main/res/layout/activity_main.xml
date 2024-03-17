@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
@@ -61,6 +61,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:gravity="center"
+            android:text="@string/empty_text_view"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -74,6 +75,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:gravity="center"
+            android:text="@string/empty_text_view"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"

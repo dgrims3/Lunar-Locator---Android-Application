@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class LocationMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -49,7 +50,7 @@ public class LocationMapsActivity extends FragmentActivity implements OnMapReady
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         LatLng userLatLng = new LatLng(latLng.get(0), latLng.get(1));
-        mMap.addMarker(new MarkerOptions().position(userLatLng).title("Current Position"));
+        mMap.addMarker(new MarkerOptions().position(userLatLng).title(String.format(Locale.getDefault(), "%f, %f", latLng.get(0), latLng.get(1))));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
         mMap.setOnMapClickListener(this);
     }
