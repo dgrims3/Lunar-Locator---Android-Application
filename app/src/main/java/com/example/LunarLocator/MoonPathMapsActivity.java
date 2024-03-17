@@ -44,6 +44,7 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
     private DatePicker date_picker;
     private ImageButton back_button;
     private double[][] twenty_four_hour_moon_lat_long;
+    private double[] currentMoonPosition;
     private boolean is_processing_event;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -54,10 +55,10 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         setContentView(binding.getRoot());
 
         back_button = findViewById(R.id.backButton);
-
+        date_picker = findViewById(R.id.mapMenuDatePicker);
         moon_locator = new MoonLocator(this);
         local_date = LocalDate.now();
-        date_picker = findViewById(R.id.mapMenuDatePicker);
+        currentMoonPosition = moon_locator.getCurrentMoonLatLong(moon_locator.getOffSet());
         is_processing_event = false;
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -77,7 +78,7 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
             twenty_four_hour_moon_lat_long = moon_locator.getTwentyFourHourMoonLatLongAtHourIntervals(local_date, moon_locator.getOffSet());
             plotTwentyFourHourMoonLatLong(twenty_four_hour_moon_lat_long);
             if (local_date.equals(LocalDate.now())) {
-                plotCurrentMoonLatLong();
+                plotCurrentMoonLatLong(currentMoonPosition);
             }
             is_processing_event = false;
         });
@@ -95,16 +96,15 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         mMap = googleMap;
 
         twenty_four_hour_moon_lat_long = moon_locator.getTwentyFourHourMoonLatLongAtHourIntervals(local_date, moon_locator.getOffSet());
-        plotCurrentMoonLatLong();
+        plotCurrentMoonLatLong(currentMoonPosition);
         plotTwentyFourHourMoonLatLong(twenty_four_hour_moon_lat_long);
 
-        LatLng startPosition = new LatLng(-95, 45);
+        LatLng startPosition = new LatLng(55, currentMoonPosition[1]);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(startPosition));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void plotCurrentMoonLatLong() {
-        double[] currentMoonPosition = moon_locator.getCurrentMoonLatLong(moon_locator.getOffSet());
+    private void plotCurrentMoonLatLong(double[] currentMoonPosition) {
         Drawable drawable = ContextCompat.getDrawable(this, R.drawable.moon_icon);
         assert drawable != null;
         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
