@@ -54,7 +54,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-location:21.1.0'
+    implementation 'com.google.android.gms:play-services-location:21.2.0'
 
     // https://mvnrepository.com/artifact/com.github.bfsmith/geotimezone
     implementation group: 'com.github.bfsmith', name: 'geotimezone', version: '1.0.3'

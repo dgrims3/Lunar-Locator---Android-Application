@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Lunar Locator</string>
-    <string name="solar_transit_text_view">Solar Transit</string>
     <string name="moon_rise_text_view">Moon Rise</string>
     <string name="moon_transit_text_view">Moon Transit</string>
     <string name="moon_set_text_view">Moon Set</string>
@@ -17,4 +16,7 @@
     <string name="map_select_button_string">Select Location</string>
     <string name="title_activity_maps_moon_path">MapsActivityMoonPath</string>
     <string name="view_on_map">View on Map</string>
+    <string name="select_location">Select Location</string>
+    <string name="back_arrow">Back Arrow</string>
+    <string name="moon_rise">Moon Rise</string>
 </resources>

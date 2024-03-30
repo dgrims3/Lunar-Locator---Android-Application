@@ -8,7 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface LunarCalc extends TimeCalc, AngleCalc {
     // moonLat β, moonLong λ, earthMoonDistance ∆
@@ -17,7 +19,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
 
     enum position {ASCENSION, DECLINATION}
 
-    enum time {RISE, TRANSIT, SET}
+    enum time {Rise, Transit, Set}
 
     enum coords {LAT, LNG, DISTANCE}
 
@@ -252,7 +254,6 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         return (latitude + additiveToMoonLat(jce)) / 1000000;
     }
 
-    // pg 287
     default double equatorialHorizontalParallax(double distance) {
         return Math.asin(6378.14 / distance);
     }
@@ -290,15 +291,15 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default double[] getMoonLatAndLongAtInstant (double jd, double fractionOfDay) {
+    default double[] getMoonLatAndLongAtInstant(double jd, double fractionOfDay) {
         double jce = calcTimeJulianCent(jd);
         double gmst = greenwichMeanSiderealTime(jce);
         double gmstAtInstant = siderealTimeAtInstantAtGreenwichInDegrees(gmst, fractionOfDay);
-        double[] ascDec = lunarAscensionDeclinationDistance(jd+fractionOfDay);
+        double[] ascDec = lunarAscensionDeclinationDistance(jd + fractionOfDay);
 
         double lat = ascDec[position.DECLINATION.ordinal()];
-        double lng = -1 * (gmstAtInstant - ascDec[position.ASCENSION.ordinal()] );
-        return new double[] {lat, lng};
+        double lng = -1 * (gmstAtInstant - ascDec[position.ASCENSION.ordinal()]);
+        return new double[]{lat, lng};
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -309,8 +310,8 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
 
         for (int i = 0; i < 24; i++) {
             double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
-            double fractionOfDay = localDateTime.getHour()/24.0;
-            double[] latLng = getMoonLatAndLongAtInstant(jd,fractionOfDay);
+            double fractionOfDay = localDateTime.getHour() / 24.0;
+            double[] latLng = getMoonLatAndLongAtInstant(jd, fractionOfDay);
             if (latLng[1] < -180) latLng[1] += 360;
             twentyFourHourMoonLatLongAtHourIntervals[i] = latLng;
             localDateTime = localDateTime.plusHours(1);
@@ -324,7 +325,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         double fractionOfDay = localDateTimeToFractionOfDay(localDateTime);
 
         double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
-        double[] latLng = getMoonLatAndLongAtInstant(jd,fractionOfDay);
+        double[] latLng = getMoonLatAndLongAtInstant(jd, fractionOfDay);
         if (latLng[1] < -180) latLng[1] += 360;
         return latLng;
     }
@@ -351,23 +352,42 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
+    default Map<ZonedDateTime, String> moonRisingSettingTransitIterationCaller(double lat, double lng, LocalDate date) {
+        Map<ZonedDateTime, String> moonPositionMap = new HashMap<>();
+        time[] values = time.values();
+        List<ZonedDateTime> riseTransitSet = moonRisingSettingTransitPrecise(lat, lng, date);
+        if (riseTransitSet.get(time.Rise.ordinal()).isAfter(riseTransitSet.get(time.Transit.ordinal()))) {
+            List<ZonedDateTime> dayBefore = moonRisingSettingTransitPrecise(lat, lng, date.minusDays(1));
+            moonPositionMap.put(dayBefore.get(time.Rise.ordinal()), "Rise");
+        }
+        if (riseTransitSet.get(time.Set.ordinal()).isBefore(riseTransitSet.get(time.Transit.ordinal()))) {
+            List<ZonedDateTime> dayAfter = moonRisingSettingTransitPrecise(lat, lng, date.plusDays(1));
+            moonPositionMap.put(dayAfter.get(time.Set.ordinal()), "Set");
+        }
+        for (int i = 0; i < 3; i++) {
+            moonPositionMap.put(riseTransitSet.get(i), String.valueOf(values[i]));
+        }
+        return moonPositionMap;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     default List<ZonedDateTime> moonRisingSettingTransitPrecise(double lat, double lng, LocalDate date) {
         List<ZonedDateTime> zonedDateTimeList = new ArrayList<>();
-        int[] positions = {time.RISE.ordinal(), time.TRANSIT.ordinal(), time.SET.ordinal()};
+        int[] positions = {time.Rise.ordinal(), time.Transit.ordinal(), time.Set.ordinal()};
         double[] coords = {lat, lng};
 
-        for (int position: positions
-             ) {
+        for (int position : positions
+        ) {
             double timeDifference = 0;
             LocalDate tempDate = date;
-            for (int i = 0; i <6; i++) {
+            for (int i = 0; i < 6; i++) {
                 double jd = getJDFromCalenderDate(tempDate.getYear(), tempDate.getMonthValue(), tempDate.getDayOfMonth() + timeDifference);
                 double[] td = lunarAscensionDeclinationDistance(jd);
                 double[] riseTransitSet = risingTransitSettingApproximate(jd, coords, td);
                 double fractionOfDay = riseTransitSet[position];
                 if (fractionOfDay < 0) {
                     tempDate.minusDays((long) Math.abs(Math.floor(fractionOfDay)));
-                    timeDifference = 1.0 + ( Math.abs(Math.ceil(fractionOfDay)) + fractionOfDay);
+                    timeDifference = 1.0 + (Math.abs(Math.ceil(fractionOfDay)) + fractionOfDay);
                 } else if (fractionOfDay > 1) {
                     tempDate.plusDays((long) Math.floor(fractionOfDay));
                     timeDifference = (fractionOfDay - Math.floor(fractionOfDay));
@@ -377,5 +397,4 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         }
         return zonedDateTimeList;
     }
-
 }

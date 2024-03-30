@@ -106,7 +106,7 @@
         android:layout_below="@id/calculate_moon_position_button"/>
 
     <TextView
-        android:id="@+id/moon_rise_text"
+        android:id="@+id/main_text_view_title_first"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -118,7 +118,7 @@
         android:layout_below="@id/divider1"/>
 
     <TextView
-        android:id="@+id/moon_rise_text_view"
+        android:id="@+id/main_text_view_first"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -126,17 +126,17 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
-        android:layout_below="@id/moon_rise_text"/>
+        android:layout_below="@id/main_text_view_title_first"/>
 
     <View
         android:id="@+id/divider3"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
-        android:layout_below="@id/moon_rise_text_view"/>
+        android:layout_below="@id/main_text_view_first"/>
 
     <TextView
-        android:id="@+id/moon_transit_text"
+        android:id="@+id/main_text_view_title_second"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -148,7 +148,7 @@
         android:layout_below="@id/divider3"/>
 
     <TextView
-        android:id="@+id/moon_transit_text_view"
+        android:id="@+id/main_text_view_second"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -156,17 +156,17 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
-        android:layout_below="@id/moon_transit_text"/>
+        android:layout_below="@id/main_text_view_title_second"/>
 
     <View
         android:id="@+id/divider4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
-        android:layout_below="@id/moon_transit_text_view"/>
+        android:layout_below="@id/main_text_view_second"/>
 
     <TextView
-        android:id="@+id/moon_set_text"
+        android:id="@+id/main_text_view_title_third"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -178,7 +178,7 @@
         android:layout_below="@id/divider4"/>
 
     <TextView
-        android:id="@+id/moon_set_text_view"
+        android:id="@+id/main_text_view_third"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -186,17 +186,17 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
-        android:layout_below="@id/moon_set_text"/>
+        android:layout_below="@id/main_text_view_title_third"/>
 
     <View
         android:id="@+id/divider5"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
-        android:layout_below="@id/moon_set_text_view"/>
+        android:layout_below="@id/main_text_view_third"/>
 
     <TextView
-        android:id="@+id/solar_noon_text"
+        android:id="@+id/main_text_view_title_fourth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -208,7 +208,7 @@
         android:layout_below="@id/divider5"/>
 
     <TextView
-        android:id="@+id/solar_noon_text_view"
+        android:id="@+id/main_text_view_fourth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -216,14 +216,14 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
-        android:layout_below="@id/solar_noon_text"/>
+        android:layout_below="@id/main_text_view_title_fourth"/>
 
     <View
         android:id="@+id/divider2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
-        android:layout_below="@id/solar_noon_text_view"/>
+        android:layout_below="@id/main_text_view_fourth"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/view_moon_on_map_button"

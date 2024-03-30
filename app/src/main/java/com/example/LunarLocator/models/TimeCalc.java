@@ -98,7 +98,7 @@ public interface TimeCalc extends AngleCalc {
         return (localDateTime.getHour()+((localDateTime.getMinute() + (localDateTime.getSecond()/60.0))/60.0))/24;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default Object localFractionOfDayFromUTCToLocal(double fractionOfDay, LocalDate date) {
+    default ZonedDateTime localFractionOfDayFromUTCToLocal(double fractionOfDay, LocalDate date) {
         ZoneId zoneId = ZoneId.systemDefault();
 
         double doubleHour = fractionOfDay * 24;
@@ -109,7 +109,6 @@ public interface TimeCalc extends AngleCalc {
                 .atZone(ZoneId.of("UTC"));
 
         return dateTimeInUTC.withZoneSameInstant(zoneId);
-
     }
 
 }

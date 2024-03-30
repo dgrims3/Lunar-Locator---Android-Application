@@ -2,6 +2,7 @@ package com.example.LunarLocator;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
@@ -32,7 +33,7 @@ public class LocationMapsActivity extends FragmentActivity implements OnMapReady
         Intent intentFromMain = getIntent();
         latLng = (ArrayList<Double>) intentFromMain.getSerializableExtra("latLng");
 
-        AppCompatButton map_select_button = findViewById(R.id.map_select_button);
+        RelativeLayout map_select_button = findViewById(R.id.map_select_button);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
