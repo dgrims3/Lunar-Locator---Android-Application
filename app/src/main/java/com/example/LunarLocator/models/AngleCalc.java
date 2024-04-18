@@ -36,7 +36,11 @@ public interface AngleCalc {
     }
 
     default double localHourAngle (double siderealInDegrees, double observerLongitude, double ascension) {
-        return siderealInDegrees - observerLongitude - ascension;
+        double hourAngle = siderealInDegrees - observerLongitude - ascension;
+        if (hourAngle < 0) {
+            return hourAngle + 360;
+        }
+        return hourAngle;
     }
 
     default double localAltitude(double localHourAngle, double observersLatitude, double declination) {
@@ -44,6 +48,13 @@ public interface AngleCalc {
         return radToDeg(altitude);
     }
 
+    default double azimuth(double localHourAngle, double observersLatitude, double declination) {
+        double numerator = Math.sin(degToRad(localHourAngle));
+        double denominator = ((Math.cos(degToRad(localHourAngle)) * Math.sin(degToRad(observersLatitude)))
+                - (Math.tan(degToRad(declination)) * Math.cos(degToRad(observersLatitude))));
+        double azimuth = Math.atan2(numerator, denominator);
+        return radToDeg(azimuth);
+    }
 
     default double getDeclination(double lat, double lng, double jce) {
         double obOfEclip = degToRad(obliquityOfEcliptic(jce));

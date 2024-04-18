@@ -33,6 +33,7 @@ import com.google.android.gms.tasks.OnTokenCanceledListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
     public ArrayList<Double> latLng;
     private TextView[][] sortedTextViews;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private LocationCallback locationCallback;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         Intent intentFromLocationMap = getIntent();
         moonLocator = new MoonLocator(this);
+        LocalDateTime localDateTime = LocalDateTime.of(1987, 4, 10, 19, 21, 0);
 
         latLng = new ArrayList<>();
         selectedDate = Calendar.getInstance();
@@ -157,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
 
         view_moon_on_map_button.setOnClickListener(view -> {
             Intent intentToMoonPathMap = new Intent(MainActivity.this, MoonPathMapsActivity.class);
+
+            intentToMoonPathMap.putExtra("latLng", latLng);
             startActivity(intentToMoonPathMap);
         });
 
@@ -164,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (Objects.equals(intent.getAction(), LocationManager.PROVIDERS_CHANGED_ACTION)) {
-                    getUserLocation(locationCallback = new LocationCallback() {
+                    getUserLocation(new LocationCallback() {
                         @Override
                         public void onLocationReceived(Location location) {
                             double latitude = location.getLatitude();

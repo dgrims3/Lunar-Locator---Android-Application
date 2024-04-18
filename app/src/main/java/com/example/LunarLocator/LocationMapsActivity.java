@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.LunarLocator.databinding.ActivityLocationMapsBinding;
@@ -60,10 +59,10 @@ public class LocationMapsActivity extends FragmentActivity implements OnMapReady
     @Override
     public void onMapClick(@NonNull LatLng selectedLatLng) {
         mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(selectedLatLng).title(String.format(Locale.getDefault(), "%f, %f", latLng.get(0), latLng.get(1))));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedLatLng));
         latLng.add(0, selectedLatLng.latitude);
         latLng.add(1, selectedLatLng.longitude);
+        mMap.addMarker(new MarkerOptions().position(selectedLatLng).title(String.format(Locale.getDefault(), "%f, %f", latLng.get(0), latLng.get(1))));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedLatLng));
     }
 
 }

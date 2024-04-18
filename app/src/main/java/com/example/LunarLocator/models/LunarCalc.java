@@ -303,6 +303,20 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
+    default double[] getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime localDateTime, int offset, double observersLatitude, double observersLongitude) {
+        localDateTime = localDateTime.minusHours(offset);
+        double fractionOfDay = localDateTimeToFractionOfDay(localDateTime);
+        double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
+        double sidereal = greenwichApparentSiderealTime(calcTimeJulianCent(jd));
+        double siderealAtInstant = siderealTimeAtInstantAtGreenwichInDegrees(sidereal, fractionOfDay);
+        double[] ascDec = lunarAscensionDeclinationDistance(jd + fractionOfDay);
+        double localHourAngle = localHourAngle(siderealAtInstant,  -1 * observersLongitude, ascDec[position.ASCENSION.ordinal()]);
+        double azimuth = azimuth(localHourAngle, observersLatitude, ascDec[position.DECLINATION.ordinal()]);
+        double altitude = localAltitude(localHourAngle, observersLatitude, ascDec[position.DECLINATION.ordinal()]);
+        return new double[]{azimuth, altitude};
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     default double[][] getTwentyFourHourMoonLatLongAtHourIntervals(LocalDate localDate, int offset) {
         double[][] twentyFourHourMoonLatLongAtHourIntervals = new double[24][2];
         LocalDateTime localDateTime = localDate.atStartOfDay();
@@ -393,7 +407,7 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
                     timeDifference = (fractionOfDay - Math.floor(fractionOfDay));
                 } else timeDifference = fractionOfDay;
             }
-            zonedDateTimeList.add(position, (ZonedDateTime) localFractionOfDayFromUTCToLocal(timeDifference, tempDate));
+            zonedDateTimeList.add(position, localFractionOfDayFromUTCToLocal(timeDifference, tempDate));
         }
         return zonedDateTimeList;
     }

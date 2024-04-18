@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public interface TimeCalc extends AngleCalc {
 
@@ -73,6 +74,7 @@ public interface TimeCalc extends AngleCalc {
         double hours = Math.floor(degrees / 15);
         double minutes = Math.floor(((degrees / 15) - hours) * 60);
         double seconds = ((((degrees / 15) - hours) * 60) - minutes) * 60;
+        // return String.format(Locale.getDefault(), "%f, %f, %f", hours, minutes, seconds);
         return new double[]{hours, minutes, seconds};
     }
 

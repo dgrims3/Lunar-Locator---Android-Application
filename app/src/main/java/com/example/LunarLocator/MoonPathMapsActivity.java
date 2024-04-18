@@ -1,6 +1,5 @@
 package com.example.LunarLocator;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,15 +12,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.LunarLocator.databinding.ActivityMoonPathMapsBinding;
 import com.example.LunarLocator.models.MoonLocator;
+import com.example.LunarLocator.models.utils.CustomInfoWindowAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,15 +29,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Locale;
 
-public class MoonPathMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MoonPathMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
     private MoonLocator moon_locator;
     private LocalDate local_date;
@@ -46,6 +48,13 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
     private double[][] twenty_four_hour_moon_lat_long;
     private double[] currentMoonPosition;
     private boolean is_processing_event;
+    private ArrayList<Double> intentPassedLatLng;
+    @Nullable
+    private Marker observerMarker, currentMoonMarker;
+    private MarkerOptions[] markerOptionArrayByHour;
+    private String[] azimuthAndAltitudeByHour, moonLatAndLongByHour, markerSnippetByHour;
+    private String currentMoonPositionMarkerSnippet;
+    private Marker[] markerArrayByHour;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -54,20 +63,34 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         com.example.LunarLocator.databinding.ActivityMoonPathMapsBinding binding = ActivityMoonPathMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Intent intentFromMain = getIntent();
+        intentPassedLatLng = (ArrayList<Double>) intentFromMain.getSerializableExtra("latLng");
+
         back_button = findViewById(R.id.backButton);
         date_picker = findViewById(R.id.mapMenuDatePicker);
+
         moon_locator = new MoonLocator(this);
         local_date = LocalDate.now();
-        currentMoonPosition = moon_locator.getCurrentMoonLatLong(moon_locator.getOffSet());
         is_processing_event = false;
+        currentMoonPosition = moon_locator.getCurrentMoonLatLong(moon_locator.getOffSet());
+        markerArrayByHour = new Marker[24];
+        markerOptionArrayByHour = new MarkerOptions[24];
+        azimuthAndAltitudeByHour = new String[24];
+        moonLatAndLongByHour = new String[24];
+        markerSnippetByHour = new String[24];
+        for (int i = 0; i < 24; i++) {
+            azimuthAndAltitudeByHour[i] = "";
+            moonLatAndLongByHour[i] = "";
+            markerSnippetByHour[i] = "";
+        }
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
-
-        date_picker.init(local_date.getYear(), local_date.getMonthValue() -1, local_date.getDayOfMonth(), (view, year1, month1, day1) -> {
+        date_picker.init(local_date.getYear(), local_date.getMonthValue() - 1, local_date.getDayOfMonth(), (view, year1, month1, day1) -> {
             if (is_processing_event) {
                 return;
             }
@@ -94,13 +117,54 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getLayoutInflater()));
 
+        if (intentPassedLatLng != null && intentPassedLatLng.size() == 2) {
+            LatLng observerLatLng = new LatLng(intentPassedLatLng.get(0), intentPassedLatLng.get(1));
+            observerMarker = mMap.addMarker(new MarkerOptions()
+                    .position(observerLatLng)
+                    .snippet(String.format(Locale.getDefault(), "Lat/Long: %f, %f", intentPassedLatLng.get(0), intentPassedLatLng.get(1)))
+                    .draggable(true));
+            buildTwentyFourHourAltitudeAndAzimuth();
+        }
         twenty_four_hour_moon_lat_long = moon_locator.getTwentyFourHourMoonLatLongAtHourIntervals(local_date, moon_locator.getOffSet());
         plotCurrentMoonLatLong(currentMoonPosition);
         plotTwentyFourHourMoonLatLong(twenty_four_hour_moon_lat_long);
 
         LatLng startPosition = new LatLng(55, currentMoonPosition[1]);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(startPosition));
+
+        mMap.setOnMapClickListener(this);
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDrag(@NonNull Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(@NonNull Marker marker) {
+                marker.setSnippet(String.format(Locale.getDefault(), "Lat/Long: %f, %f", marker.getPosition().latitude, marker.getPosition().longitude));
+                updateAllSnippets();
+            }
+
+            @Override
+            public void onMarkerDragStart(@NonNull Marker marker) {
+
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onMapClick(@NonNull LatLng selectedLatLng) {
+        if (observerMarker == null) {
+            observerMarker = mMap.addMarker(
+                    new MarkerOptions()
+                            .position(selectedLatLng)
+                            .snippet(String.format(Locale.getDefault(), "Lat/Long %f, %f", selectedLatLng.latitude, selectedLatLng.longitude))
+                            .draggable(true));
+            updateAllSnippets();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -109,17 +173,17 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         assert drawable != null;
         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
         int width = (int) Math.floor(bitmap.getWidth() * .7);
-        int height = (int) Math.floor( bitmap.getHeight() * .7);
+        int height = (int) Math.floor(bitmap.getHeight() * .7);
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
         BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-
-        mMap.addMarker(new MarkerOptions()
+        buildCurrentMoonPositionMarkerSnippet();
+        currentMoonMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(currentMoonPosition[0], currentMoonPosition[1]))
                 .icon(icon)
                 .anchor(0.5f, 0.5f)
                 .zIndex(1)
                 .title("Current Location")
-                .snippet(String.format(Locale.getDefault(), "%f, %f", currentMoonPosition[0], currentMoonPosition[1])));
+                .snippet(currentMoonPositionMarkerSnippet));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -128,15 +192,17 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
         for (int i = 0; i < 24; i++) {
             double[] latLng = twentyFourHourMoonLatLong[i];
             LatLng location = new LatLng(latLng[0], latLng[1]);
-            LocalTime time = moon_locator.fractionOfDayToLocalTime(i/24.0);
-            String markerSnippet = String.format(Locale.getDefault(), "%f, %f", location.latitude, location.longitude);
-            String title = String.format(Locale.getDefault() ,"%tT", time);
-            mMap.addMarker(new MarkerOptions()
+            LocalTime time = moon_locator.fractionOfDayToLocalTime(i / 24.0);
+            moonLatAndLongByHour[i] = String.format(Locale.getDefault(), "Lat/Long: %f, %f\n", location.latitude, location.longitude);
+            String title = String.format(Locale.getDefault(), "Time: %tT", time);
+            buildTwentyFourHourMarkerSnippet();
+            markerOptionArrayByHour[i] = new MarkerOptions()
                     .position(location)
                     .icon(BitmapDescriptorFactory.fromBitmap(getDotBitmap()))
                     .anchor(0.5f, 0.5f)
                     .title(title)
-                    .snippet(markerSnippet));
+                    .snippet(markerSnippetByHour[i]);
+            markerArrayByHour[i] = mMap.addMarker(markerOptionArrayByHour[i]);
 
             // Add line between the two locations
             if (lastLocation != null) {
@@ -148,6 +214,47 @@ public class MoonPathMapsActivity extends FragmentActivity implements OnMapReady
             lastLocation = location;
         }
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void buildTwentyFourHourAltitudeAndAzimuth() {
+        if (observerMarker != null) {
+            for (int i = 0; i < 24; i++) {
+                LocalTime time = moon_locator.fractionOfDayToLocalTime(i / 24.0);
+                double[] azimuthAndAltitude = moon_locator.getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime.of(local_date.getYear(), local_date.getMonthValue(), local_date.getDayOfMonth(), time.getHour(), time.getMinute(), time.getSecond()), moon_locator.getOffSet(), observerMarker.getPosition().latitude, observerMarker.getPosition().longitude);
+                String azimuthAndAltitudeFormattedString = String.format(Locale.getDefault(), "Azimuth: %f\nAltitude: %f\n", azimuthAndAltitude[0], azimuthAndAltitude[1]);
+                azimuthAndAltitudeByHour[i] = azimuthAndAltitudeFormattedString;
+            }
+        }
+    }
+
+    private void buildTwentyFourHourMarkerSnippet() {
+        for (int i = 0; i < 24; i++) {
+            markerSnippetByHour[i] = azimuthAndAltitudeByHour[i] + moonLatAndLongByHour[i];
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void buildCurrentMoonPositionMarkerSnippet() {
+        String moonLatAndLongString = String.format(Locale.getDefault(), "Lat/Long: %f, %f\n", currentMoonPosition[0], currentMoonPosition[1]);
+        String azimuthAndAltitudeString = "";
+        if (observerMarker != null) {
+            double[] azimuthAndAltitude = moon_locator.getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime.now(), moon_locator.getOffSet(), observerMarker.getPosition().latitude, observerMarker.getPosition().longitude);
+            azimuthAndAltitudeString = String.format(Locale.getDefault(), "Azimuth: %f\nAltitude: %f\n", azimuthAndAltitude[0], azimuthAndAltitude[1]);
+        }
+        currentMoonPositionMarkerSnippet = azimuthAndAltitudeString + moonLatAndLongString;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void updateAllSnippets() {
+        buildCurrentMoonPositionMarkerSnippet();
+        currentMoonMarker.setSnippet(currentMoonPositionMarkerSnippet);
+        buildTwentyFourHourAltitudeAndAzimuth();
+        buildTwentyFourHourMarkerSnippet();
+        for (int i = 0; i < 24; i++) {
+            markerArrayByHour[i].setSnippet(markerSnippetByHour[i]);
+        }
+    }
+
     private Bitmap getDotBitmap() {
         int size = 50;
         ShapeDrawable shapeDrawable = new ShapeDrawable(new OvalShape());
