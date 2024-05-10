@@ -13,6 +13,9 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,10 +33,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,13 +46,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-
 public class MainActivity extends AppCompatActivity implements TimeCalc {
 
     private final static int REQUEST_CODE = 99;
     private TextView main_text_view_first, main_text_view_second, main_text_view_third, main_text_view_fourth,
             main_text_view_title_first, main_text_view_title_second, main_text_view_title_third, main_text_view_title_fourth,
             latitude_text_view, longitude_text_view, date_text_view;
+    private View extraBorder;
     private MoonLocator moonLocator;
     private Calendar selectedDate;
     private Map<ZonedDateTime, String> moonTimes;
@@ -66,8 +69,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         Intent intentFromLocationMap = getIntent();
-        moonLocator = new MoonLocator(this);
-        LocalDateTime localDateTime = LocalDateTime.of(1987, 4, 10, 19, 21, 0);
+        moonLocator = new MoonLocator();
 
         latLng = new ArrayList<>();
         selectedDate = Calendar.getInstance();
@@ -91,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         longitude_text_view = findViewById(R.id.longitude_text_view);
         date_text_view = findViewById(R.id.date_text_view);
 
+        extraBorder = findViewById(R.id.divider5);
+        extraBorder.setVisibility(View.INVISIBLE);
+
         sortedTextViews = new TextView[][]{
                 {main_text_view_title_first, main_text_view_first},
                 {main_text_view_title_second, main_text_view_second},
@@ -110,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                     selectedDate.get(Calendar.MONTH),
                     selectedDate.get(Calendar.DAY_OF_MONTH));
             dialog.show();
+            dialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.textColorPrimary));
+            dialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.textColorPrimary));
         });
 
         get_map_button.setOnClickListener(view -> {
@@ -153,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                     sortedTextViews[i][1].setText(body);
                     i++;
                 }
+                if (sortedMoonTimes.size() > 3) {
+                    extraBorder.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -160,6 +170,9 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             Intent intentToMoonPathMap = new Intent(MainActivity.this, MoonPathMapsActivity.class);
 
             intentToMoonPathMap.putExtra("latLng", latLng);
+            intentToMoonPathMap.putExtra("date",  LocalDate.of(selectedDate.get(Calendar.YEAR),
+                    selectedDate.get(Calendar.MONTH) + 1, // Convert Calendar month index to LocalDate index
+                    selectedDate.get(Calendar.DAY_OF_MONTH)));
             startActivity(intentToMoonPathMap);
         });
 
@@ -192,7 +205,10 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         registerReceiver(locationChangeReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
 
         if (intentFromLocationMap != null && intentFromLocationMap.hasExtra("latLng") && latLng != null) {
-            latLng = (ArrayList<Double>) intentFromLocationMap.getSerializableExtra("latLng");
+            Serializable serializableArray = intentFromLocationMap.getSerializableExtra("latLng");
+            if (serializableArray instanceof ArrayList) {
+                latLng = (ArrayList<Double>) serializableArray;
+            }
 
             latitude_text_view.setText(String.valueOf(latLng != null ? latLng.get(0) : null));
             longitude_text_view.setText(String.valueOf(latLng != null ? latLng.get(1) : null));
@@ -230,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             main_text_view_third.setText("");
             main_text_view_title_fourth.setText("");
             main_text_view_fourth.setText("");
+            extraBorder.setVisibility(View.INVISIBLE);
             getUserLocation(new LocationCallback() {
                 @Override
                 public void onLocationReceived(Location location) {
@@ -332,6 +349,13 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                 Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_bar, menu);
+        return true;
     }
 
 }

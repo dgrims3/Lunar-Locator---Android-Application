@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
 
 <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="5dp">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/get_date_picker_button"
@@ -22,7 +23,6 @@
             android:layout_marginBottom="4dp"
             android:textColor="?android:attr/textColorPrimary"
             android:background="@drawable/rounded_border_button"
-            android:backgroundTint="@color/button_color_primary"
             android:text="@string/get_date_picker_button_text"
             android:gravity="center"/>
 
@@ -48,7 +48,7 @@
             android:layout_marginBottom="4dp"
             android:textColor="?android:attr/textColorPrimary"
             android:background="@drawable/rounded_border_button"
-            android:backgroundTint="@color/button_color_primary"
+
             android:text="@string/get_map_text"
             android:gravity="center"
             android:layout_below="@id/date_text_view"/>
@@ -62,6 +62,7 @@
             android:layout_marginBottom="4dp"
             android:gravity="center"
             android:hint="@string/empty_text_view"
+            android:textColorHint="@color/textColorPrimary"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -76,6 +77,7 @@
             android:layout_marginBottom="4dp"
             android:gravity="center"
             android:hint="@string/empty_text_view"
+            android:textColorHint="@color/textColorPrimary"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -89,7 +91,6 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:background="@drawable/rounded_border_button"
-            android:backgroundTint="@color/button_color_primary"
             android:textColor="?android:attr/textColorPrimary"
             android:text="@string/calculate_moon_position_button_text"
             android:gravity="center"
@@ -123,13 +124,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:hint="@string/empty_text_view"
+        android:textColorHint="@color/textColorPrimary"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
         android:layout_below="@id/main_text_view_title_first"/>
 
     <View
-        android:id="@+id/divider3"
+        android:id="@+id/divider2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
@@ -145,7 +147,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_below="@id/divider3"/>
+        android:layout_below="@id/divider2"/>
 
     <TextView
         android:id="@+id/main_text_view_second"
@@ -153,13 +155,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:hint="@string/empty_text_view"
+        android:textColorHint="@color/textColorPrimary"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
         android:layout_below="@id/main_text_view_title_second"/>
 
     <View
-        android:id="@+id/divider4"
+        android:id="@+id/divider3"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
@@ -175,7 +178,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_below="@id/divider4"/>
+        android:layout_below="@id/divider3"/>
 
     <TextView
         android:id="@+id/main_text_view_third"
@@ -183,13 +186,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:hint="@string/empty_text_view"
+        android:textColorHint="@color/textColorPrimary"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"
         android:gravity="center"
         android:layout_below="@id/main_text_view_title_third"/>
 
     <View
-        android:id="@+id/divider5"
+        android:id="@+id/divider4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
@@ -205,7 +209,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_below="@id/divider5"/>
+        android:layout_below="@id/divider4"/>
 
     <TextView
         android:id="@+id/main_text_view_fourth"
@@ -219,7 +223,7 @@
         android:layout_below="@id/main_text_view_title_fourth"/>
 
     <View
-        android:id="@+id/divider2"
+        android:id="@+id/divider5"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider_color"
@@ -231,9 +235,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
         android:textColor="?android:attr/textColorSecondary"
-        android:backgroundTint="@color/button_color_secondary"
+        android:background="@drawable/rounded_border_button"
+        android:backgroundTint="@color/button_color_primary"
         android:text="@string/view_on_map" />
 
 </RelativeLayout>

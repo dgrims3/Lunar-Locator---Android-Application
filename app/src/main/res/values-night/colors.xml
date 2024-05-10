@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="textColorPrimary">#dcdcdc</color>
-    <color name="textColorSecondary">#FF000000</color>
-    <color name="button_color_primary">#212121</color>
-    <color name="button_color_secondary">#168AFF</color>
-    <color name="divider_color">#212121</color>
-</resources>

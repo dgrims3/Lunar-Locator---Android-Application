@@ -2,6 +2,7 @@ package com.example.LunarLocator;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -30,7 +32,10 @@ public class LocationMapsActivity extends FragmentActivity implements OnMapReady
         setContentView(binding.getRoot());
 
         Intent intentFromMain = getIntent();
-        latLng = (ArrayList<Double>) intentFromMain.getSerializableExtra("latLng");
+        Serializable serializableArray = intentFromMain.getSerializableExtra("latLng");
+        if (serializableArray instanceof ArrayList) {
+            latLng = (ArrayList<Double>) serializableArray;
+        }
 
         RelativeLayout map_select_button = findViewById(R.id.map_select_button);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -53,6 +58,14 @@ public class LocationMapsActivity extends FragmentActivity implements OnMapReady
         mMap.addMarker(new MarkerOptions().position(userLatLng).title(String.format(Locale.getDefault(), "%f, %f", latLng.get(0), latLng.get(1))));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
         mMap.setOnMapClickListener(this);
+
+        mMap.setOnCameraMoveListener(() -> {
+            if (mMap.getCameraPosition().bearing != 0) {
+                findViewById(R.id.toolbar).setVisibility(View.INVISIBLE);
+            } else {
+                findViewById(R.id.toolbar).setVisibility(View.VISIBLE);
+            }
+        });
     }
 
 

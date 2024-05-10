@@ -229,15 +229,15 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     default double[] moon_periodic_term_summation(double d, double m, double m_prime, double f, double jce, double[][] terms) {
-        double e, e_mult, trig_arg, sin_sum, cos_sum;
+        double e, e_multi, trig_arg, sin_sum, cos_sum;
         e = 1.0 - jce * (0.002516 + jce * 0.0000074);
         sin_sum = 0;
         cos_sum = 0;
         for (int i = 0; i < COUNT; i++) {
-            e_mult = Math.pow(e, Math.abs(terms[i][Term.TERM_M.ordinal()]));
+            e_multi = Math.pow(e, Math.abs(terms[i][Term.TERM_M.ordinal()]));
             trig_arg = degToRad(terms[i][Term.TERM_D.ordinal()] * d + terms[i][Term.TERM_M.ordinal()] * m + terms[i][Term.TERM_MPR.ordinal()] * m_prime + terms[i][Term.TERM_F.ordinal()] * f);
-            sin_sum += e_mult * terms[i][Term.TERM_LB.ordinal()] * Math.sin(trig_arg);
-            cos_sum += e_mult * terms[i][Term.TERM_R.ordinal()] * Math.cos(trig_arg);
+            sin_sum += e_multi * terms[i][Term.TERM_LB.ordinal()] * Math.sin(trig_arg);
+            cos_sum += e_multi * terms[i][Term.TERM_R.ordinal()] * Math.cos(trig_arg);
         }
         return new double[]{sin_sum, cos_sum};
     }
@@ -291,15 +291,16 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default double[] getMoonLatAndLongAtInstant(double jd, double fractionOfDay) {
+    default double[] getMoonLatLongDistanceAtInstant(double jd, double fractionOfDay) {
         double jce = calcTimeJulianCent(jd);
         double gmst = greenwichMeanSiderealTime(jce);
         double gmstAtInstant = siderealTimeAtInstantAtGreenwichInDegrees(gmst, fractionOfDay);
-        double[] ascDec = lunarAscensionDeclinationDistance(jd + fractionOfDay);
+        double[] ascDecDistance = lunarAscensionDeclinationDistance(jd + fractionOfDay);
 
-        double lat = ascDec[position.DECLINATION.ordinal()];
-        double lng = -1 * (gmstAtInstant - ascDec[position.ASCENSION.ordinal()]);
-        return new double[]{lat, lng};
+        double lat = ascDecDistance[position.DECLINATION.ordinal()];
+        double lng = -1 * (gmstAtInstant - ascDecDistance[position.ASCENSION.ordinal()]);
+        double distance = ascDecDistance[coords.DISTANCE.ordinal()];
+        return new double[]{lat, lng, distance};
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -312,38 +313,57 @@ public interface LunarCalc extends TimeCalc, AngleCalc {
         double[] ascDec = lunarAscensionDeclinationDistance(jd + fractionOfDay);
         double localHourAngle = localHourAngle(siderealAtInstant,  -1 * observersLongitude, ascDec[position.ASCENSION.ordinal()]);
         double azimuth = azimuth(localHourAngle, observersLatitude, ascDec[position.DECLINATION.ordinal()]);
+        azimuth += 180;
+        if (azimuth == 360) {
+            azimuth = 0;
+        }
         double altitude = localAltitude(localHourAngle, observersLatitude, ascDec[position.DECLINATION.ordinal()]);
         return new double[]{azimuth, altitude};
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default double[][] getTwentyFourHourMoonLatLongAtHourIntervals(LocalDate localDate, int offset) {
-        double[][] twentyFourHourMoonLatLongAtHourIntervals = new double[24][2];
+    default double[][] getTwentyFourHourMoonLatLongDistanceAtHourIntervals(LocalDate localDate, int offset) {
+        double[][] twentyFourHourMoonLatLongAtHourIntervals = new double[24][3];
         LocalDateTime localDateTime = localDate.atStartOfDay();
         localDateTime = localDateTime.minusHours(offset);
 
         for (int i = 0; i < 24; i++) {
             double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
             double fractionOfDay = localDateTime.getHour() / 24.0;
-            double[] latLng = getMoonLatAndLongAtInstant(jd, fractionOfDay);
-            if (latLng[1] < -180) latLng[1] += 360;
-            twentyFourHourMoonLatLongAtHourIntervals[i] = latLng;
+            double[] latLngDistance = getMoonLatLongDistanceAtInstant(jd, fractionOfDay);
+            if (latLngDistance[1] < -180) latLngDistance[1] += 360;
+            twentyFourHourMoonLatLongAtHourIntervals[i] = latLngDistance;
             localDateTime = localDateTime.plusHours(1);
         }
         return twentyFourHourMoonLatLongAtHourIntervals;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default double[] getCurrentMoonLatLong(int offset) {
+    default double[] getCurrentMoonLatLongDistance(int offset) {
         LocalDateTime localDateTime = LocalDateTime.now().minusHours(offset);
         double fractionOfDay = localDateTimeToFractionOfDay(localDateTime);
 
         double jd = getJDFromCalenderDate(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
-        double[] latLng = getMoonLatAndLongAtInstant(jd, fractionOfDay);
-        if (latLng[1] < -180) latLng[1] += 360;
-        return latLng;
+        double[] latLngDistance = getMoonLatLongDistanceAtInstant(jd, fractionOfDay);
+        if (latLngDistance[1] < -180) latLngDistance[1] += 360;
+        return latLngDistance;
     }
 
+    default double moonIlluminatedFractionOfDisk (double jd) {
+        double jce = calcTimeJulianCent(jd);
+        double D = moon_mean_elongation_D(jce);
+        double M = sun_mean_anomaly_M(jce);
+        double MPR = moon_mean_anomaly_M_PRIME(jce);
+
+        double phaseAngle = 180 - D -
+                (6.289 * Math.sin(MPR)) +
+                (2.1 * Math.sin(M)) -
+                (1.274 * Math.sin((2 * D)-M)) -
+                (.658 + Math.sin(2 * D)) -
+                (.214 * Math.sin(2 * MPR)) -
+                (.11 * Math.sin(D));
+        return ((1 + Math.cos(degToRad(phaseAngle))) / 2) * 100;
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     default double[] risingTransitSettingApproximate(double jd, double[] latlng, double[] lunarAscDecDist) {

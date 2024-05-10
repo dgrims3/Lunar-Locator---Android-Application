@@ -7,12 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="divider_color">#F0F0F0</color>
     <color name="your_thumb_color">#c89666</color>
     <color name="your_track_color">#2d545e</color>
     <color name="color_primary">#3ab1c8</color>
-    <color name="button_color_primary">#FFFFFFFF</color>
-    <color name="button_color_secondary">#168AFF</color>
-    <color name="textColorPrimary">#FF000000</color>
-    <color name="textColorSecondary">#FFFFFFFF</color>
+    <color name="textColorPrimary">#dcdcdc</color>
+    <color name="textColorSecondary">#FF000000</color>
+    <color name="button_color_secondary">#212121</color>
+    <color name="button_color_primary">#168AFF</color>
+    <color name="divider_color">#212121</color>
+    <color name="background_color_primary">#121212</color>
+    <color name="background_color_primary_variant">#000000</color>
+    <color name="light_gray">#282828</color>
 </resources>

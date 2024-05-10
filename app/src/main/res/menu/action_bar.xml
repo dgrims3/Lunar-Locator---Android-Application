@@ -1,0 +1,12 @@
+<!-- res/menu/action_bar.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_Bar"
+        android:title="Lunar Locator"
+        android:icon="@drawable/moon_icon"
+        android:orderInCategory="0"
+        app:showAsAction="always"
+        />
+
+</menu>

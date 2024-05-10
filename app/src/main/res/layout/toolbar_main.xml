@@ -1,0 +1,12 @@
+<!-- toolbar_layout.xml -->
+<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="?actionBarSize"
+    android:layout_height="?attr/actionBarSize"
+    android:background="?attr/colorPrimary">
+
+    <!-- Your custom action item -->
+    <include layout="@layout/custom_action_item"/>
+
+</androidx.appcompat.widget.Toolbar>

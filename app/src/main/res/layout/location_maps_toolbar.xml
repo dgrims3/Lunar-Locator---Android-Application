@@ -3,8 +3,9 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize"
-    android:background="@color/button_color_secondary"
+    android:background="@android:color/transparent"
     android:elevation="4dp"
+    android:layout_marginTop="10dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <RelativeLayout
@@ -32,6 +33,7 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:text="@string/select_location"
+            android:textStyle="bold"
             android:textSize="20sp"
             android:textColor="@color/black" />
 
