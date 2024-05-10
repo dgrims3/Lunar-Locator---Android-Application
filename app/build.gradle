@@ -11,17 +11,12 @@ plugins {
 
 android {
     signingConfigs {
-        debug {
-            storeFile file('/home/david/keystore/upload-keystore.jks')
-            storePassword 'Theraininspain1!'
-            keyAlias 'upload'
-            keyPassword 'Theraininspain1!'
-        }
+
     }
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.LunarLocator"
+        applicationId "com.ll.LunarLocator"
         minSdk 23
         //noinspection EditedTargetSdkVersion
         targetSdk 34
