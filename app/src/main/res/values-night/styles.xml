@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Your night mode theme -->
+    <style name="AppThemeNight" parent="AppTheme">
+        <!-- Override textColorPrimary with a different color for night mode -->
+        <item name="android:textColorPrimary">#FFBB86FC</item>
+    </style>
+
+</resources>
