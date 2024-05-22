@@ -1,12 +1,16 @@
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
+    app:titleTextColor="@color/textColorSecondary"
     android:background="?attr/colorPrimary">
+
 
     <!-- Your customizations here -->
     <ImageView
         android:id="@+id/action_bar_icon"
+        android:contentDescription="@string/application_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/moon_icon"

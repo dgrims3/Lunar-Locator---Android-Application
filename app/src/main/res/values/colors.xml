@@ -10,8 +10,8 @@
     <color name="your_thumb_color">#c89666</color>
     <color name="your_track_color">#2d545e</color>
     <color name="color_primary">#3ab1c8</color>
-    <color name="textColorPrimary">#dcdcdc</color>
-    <color name="textColorSecondary">#FF000000</color>
+    <color name="textColorSecondary">#dcdcdc</color>
+    <color name="textColorPrimary">#FF000000</color>
     <color name="button_color_secondary">#212121</color>
     <color name="button_color_primary">#168AFF</color>
     <color name="divider_color">#212121</color>

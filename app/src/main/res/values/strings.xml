@@ -20,4 +20,7 @@
     <string name="back_arrow">Back Arrow</string>
     <string name="moon_rise">Moon Rise</string>
     <string name="app_icon">app_icon</string>
+    <string name="back_to_main_screen_button">Back to main screen button</string>
+    <string name="google_maps_date_picker">Google Maps date picker</string>
+    <string name="application_icon">Application Icon</string>
 </resources>

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_Bar"
-        android:title="Lunar Locator"
+        android:title="@string/app_name"
         android:icon="@drawable/moon_icon"
         android:orderInCategory="0"
         app:showAsAction="always"

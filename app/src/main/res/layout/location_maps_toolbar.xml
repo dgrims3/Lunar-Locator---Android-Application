@@ -12,6 +12,7 @@
         android:id="@+id/map_select_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:contentDescription="@string/back_to_main_screen_button"
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackgroundBorderless">

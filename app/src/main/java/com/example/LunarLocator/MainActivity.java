@@ -8,11 +8,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
@@ -21,9 +25,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.LunarLocator.models.MoonLocator;
@@ -115,8 +121,10 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                     selectedDate.get(Calendar.MONTH),
                     selectedDate.get(Calendar.DAY_OF_MONTH));
             dialog.show();
-            dialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.textColorPrimary));
-            dialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.textColorPrimary));
+            if (isDarkModeEnabled()) {
+                dialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.textColorSecondary));
+                dialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.textColorSecondary));
+            }
         });
 
         get_map_button.setOnClickListener(view -> {
@@ -351,10 +359,22 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         });
     }
 
+    private boolean isDarkModeEnabled() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.action_bar, menu);
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            SpannableString title = new SpannableString(actionBar.getTitle());
+            title.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, android.R.color.white)), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            actionBar.setTitle(title);
+        }
         return true;
     }
 

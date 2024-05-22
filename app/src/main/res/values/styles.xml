@@ -2,8 +2,14 @@
 <resources>
     <!-- Your main app theme -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="actionMenuTextAppearance">@color/textColorSecondary</item>
         <!-- Define other attributes for your main theme -->
         <!-- For example, you may have defined textColorPrimary here -->
     </style>
+
+    <style name="MyActionBarTitleTextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/textColorSecondary</item>
+    </style>
+
 
 </resources>
