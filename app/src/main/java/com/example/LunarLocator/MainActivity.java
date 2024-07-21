@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkLocationPermission();
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         Intent intentFromLocationMap = getIntent();
@@ -323,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
             )) {
                 new AlertDialog.Builder(this)
                         .setTitle("Location Permission Needed")
-                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setMessage("This app needs Location permission, please accept to use location functionality")
                         .setPositiveButton(
                                 "OK",
                                 (dialog, which) -> requestLocationPermission())
@@ -341,22 +343,36 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_CODE
         );
-        getUserLocation(new LocationCallback() {
-            @Override
-            public void onLocationReceived(Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                latitude_text_view.setText(String.valueOf(latitude));
-                longitude_text_view.setText(String.valueOf(longitude));
-                latLng.add(0, latitude);
-                latLng.add(1, longitude);
-            }
 
-            @Override
-            public void onLocationError(String errorMessage) {
-                Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed with getting location
+                getUserLocation(new LocationCallback() {
+                    @Override
+                    public void onLocationReceived(Location location) {
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        latitude_text_view.setText(String.valueOf(latitude));
+                        longitude_text_view.setText(String.valueOf(longitude));
+                        latLng.add(0, latitude);
+                        latLng.add(1, longitude);
+                    }
+
+                    @Override
+                    public void onLocationError(String errorMessage) {
+                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                // Permission denied, handle appropriately
+                Toast.makeText(this, "Permission denied. Unable to access location.", Toast.LENGTH_SHORT).show();
             }
-        });
+        }
     }
 
     private boolean isDarkModeEnabled() {
