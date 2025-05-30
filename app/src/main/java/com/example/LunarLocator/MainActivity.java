@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
