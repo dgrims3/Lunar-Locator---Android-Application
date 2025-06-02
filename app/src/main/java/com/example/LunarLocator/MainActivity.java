@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable();
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
