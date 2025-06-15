@@ -17,13 +17,13 @@ import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.view.MenuInflater;
-import android.view.View;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
@@ -44,6 +44,8 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,7 +57,9 @@ import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements TimeCalc {
 
-    private final static int REQUEST_CODE = 99;
+    private final static int LOCATION_REQUEST_CODE= 99;
+    private static final int CAMERA_REQUEST_CODE = 1001;
+    private static final int ALL_PERMISSIONS_REQUEST_CODE = 991001;
     private TextView main_text_view_first, main_text_view_second, main_text_view_third, main_text_view_fourth,
             main_text_view_title_first, main_text_view_title_second, main_text_view_title_third, main_text_view_title_fourth,
             latitude_text_view, longitude_text_view, date_text_view;
@@ -70,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -343,15 +346,16 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQUEST_CODE
+                LOCATION_REQUEST_CODE
         );
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE) {
+        if (requestCode == LOCATION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, proceed with getting location
                 getUserLocation(new LocationCallback() {
@@ -375,6 +379,34 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
                 Toast.makeText(this, "Permission denied. Unable to access location.", Toast.LENGTH_SHORT).show();
             }
         }
+        else if (requestCode == CAMERA_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, launch camera activity
+                Intent intentToCamera = new Intent(MainActivity.this, CameraFindMoon.class);
+                startActivity(intentToCamera);
+            } else {
+                Toast.makeText(this, "Camera permission denied.", Toast.LENGTH_SHORT).show();
+            }
+        }else if (requestCode == ALL_PERMISSIONS_REQUEST_CODE) {
+            boolean allGranted = true;
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
+                startCameraIntent();
+            } else {
+                Toast.makeText(this, "One or more permissions denied. Cannot perform all actions.", Toast.LENGTH_SHORT).show();
+                if (grantResults[0] == PackageManager.PERMISSION_DENIED && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    Toast.makeText(this, "Location access denied.", Toast.LENGTH_SHORT).show();
+                }
+                if (grantResults.length > 1 && grantResults[1] == PackageManager.PERMISSION_DENIED && permissions[1].equals(Manifest.permission.CAMERA)) {
+                    Toast.makeText(this, "Camera access denied.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     private boolean isDarkModeEnabled() {
@@ -396,4 +428,45 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_Bar) {
+            boolean hasCameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+            boolean hasLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+            if (hasCameraPermission && hasLocationPermission) {
+                startCameraIntent();
+            } else {
+                ArrayList<String> permissionsToRequest = new ArrayList<>();
+                if (!hasLocationPermission) {
+                    permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+                if (!hasCameraPermission) {
+                    permissionsToRequest.add(Manifest.permission.CAMERA);
+                }
+
+                if (!permissionsToRequest.isEmpty()) {
+                    ActivityCompat.requestPermissions(this,
+                            permissionsToRequest.toArray(new String[0]), ALL_PERMISSIONS_REQUEST_CODE);
+                }
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void startCameraIntent() {
+        LocalTime time = LocalTime.now();
+        LocalDate localDate = LocalDate.of(selectedDate.get(Calendar.YEAR),
+                selectedDate.get(Calendar.MONTH) + 1, // Convert Calendar month index to LocalDate index
+                selectedDate.get(Calendar.DAY_OF_MONTH));
+        double[] azimuthAndAltitude = moonLocator.getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime.of(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), time.getHour(), time.getMinute(), time.getSecond()), moonLocator.getOffSet(), latLng.get(0), latLng.get(1));
+        Intent intentToCamera = new Intent(MainActivity.this, CameraFindMoon.class);
+        intentToCamera.putExtra("azimuth_and_altitude", azimuthAndAltitude);
+        startActivity(intentToCamera);
+    }
 }

@@ -23,4 +23,5 @@
     <string name="back_to_main_screen_button">Back to main screen button</string>
     <string name="google_maps_date_picker">Google Maps date picker</string>
     <string name="application_icon">Application Icon</string>
+    <string name="title_activity_camera_find_moon">CameraFindMoon</string>
 </resources>
