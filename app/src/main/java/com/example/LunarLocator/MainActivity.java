@@ -464,9 +464,13 @@ public class MainActivity extends AppCompatActivity implements TimeCalc {
         LocalDate localDate = LocalDate.of(selectedDate.get(Calendar.YEAR),
                 selectedDate.get(Calendar.MONTH) + 1, // Convert Calendar month index to LocalDate index
                 selectedDate.get(Calendar.DAY_OF_MONTH));
-        double[] azimuthAndAltitude = moonLocator.getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime.of(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), time.getHour(), time.getMinute(), time.getSecond()), moonLocator.getOffSet(), latLng.get(0), latLng.get(1));
-        Intent intentToCamera = new Intent(MainActivity.this, CameraFindMoon.class);
-        intentToCamera.putExtra("azimuth_and_altitude", azimuthAndAltitude);
-        startActivity(intentToCamera);
+        if (latLng == null || latLng.isEmpty()) {
+            Toast.makeText(this,"Enable Location to use this Service", Toast.LENGTH_SHORT).show();
+        } else {
+            double[] azimuthAndAltitude = moonLocator.getAzimuthAndAltitudeForMoonAtInstant(LocalDateTime.of(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), time.getHour(), time.getMinute(), time.getSecond()), moonLocator.getOffSet(), latLng.get(0), latLng.get(1));
+            Intent intentToCamera = new Intent(MainActivity.this, CameraFindMoon.class);
+            intentToCamera.putExtra("azimuth_and_altitude", azimuthAndAltitude);
+            startActivity(intentToCamera);
+        }
     }
 }
